@@ -1,4 +1,4 @@
-package egs;
+package projectFive;
 
 import java.io.*;
 

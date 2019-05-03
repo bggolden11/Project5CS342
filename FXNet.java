@@ -1,4 +1,4 @@
-package egs;
+package projectFive;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -14,7 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import egs.Game.GameCommands;
+import projectFive.Game.GameCommands;
 
 public class FXNet extends Application {
 

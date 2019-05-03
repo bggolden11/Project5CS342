@@ -1,8 +1,8 @@
-package egs;
+package projectFive;
 
 import java.io.IOException;
 
-import egs.NetworkConnection.ClientThread;
+import projectFive.NetworkConnection.ClientThread;
 
 public class ClientInfo {
 	private int id;

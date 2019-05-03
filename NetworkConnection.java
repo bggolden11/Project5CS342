@@ -1,4 +1,4 @@
-package egs;
+package projectFive;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -10,8 +10,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-import egs.Game;
-import egs.Game.GameCommands;
+import projectFive.Game;
+import projectFive.Game.GameCommands;
 import javafx.application.Platform;
 
 public abstract class NetworkConnection {

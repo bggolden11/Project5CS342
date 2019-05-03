@@ -1,4 +1,4 @@
-package egs;
+package projectFive;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import egs.Game.GameCommands;
+import projectFive.Game.GameCommands;
 
 class TestGame {
 
