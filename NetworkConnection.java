@@ -70,30 +70,38 @@ public abstract class NetworkConnection {
 	public void send(Serializable data) throws Exception {
 		if(isServer())
 		{
-			ClientInfo clientOne = getClientByID(playerOne);
-			ClientInfo clientTwo = getClientByID(playerTwo);
-			
-			if(playerOne > 0 && playerTwo > 0 && clientOne.hasResponded() && clientTwo.hasResponded())
-			{
+			int responsesReady = 0;
 
-				//check responses
-				int winnerID = Game.scoreHand(clientOne.getResponse(), clientTwo.getResponse());
-				if(winnerID == 1)
+			for(ClientInfo client : clients)
+			{
+				if(!client.hasResponded())
 				{
-					clientOne.addPoint();
-					winnerID = clientOne.getID();
+					callback.accept("Player " + client.getID() + " still need to select a sentence.");
+					
 				}
-				else if(winnerID == 2)
-				{
-					clientTwo.addPoint();
-					winnerID = clientTwo.getID();
-				}
+				else
+					responsesReady++;
+			}
+			
+			if(responsesReady == clients.size())
+			{
+				callback.accept("ready");
+			}
+			else
+			{
+				callback.accept("not ready");
+			}
+			
+			if(true)
+			{
+				/*
 				
 				final String dataString = "\nPlayer " + clientOne.getID() + " (" + clientOne.getPoints() + " points) played " + clientOne.getResponse() + "\n" + 
 						"Player " + clientTwo.getID() + " (" + clientTwo.getPoints() + " points) played " + clientTwo.getResponse() + "\n"
 							+ (winnerID > 0 ? 
 								("Player " + winnerID + " has won the round.") : 
 								("This round is a tie.")) + "\n";
+								
 
 				callback.accept(dataString);
 				
@@ -107,10 +115,10 @@ public abstract class NetworkConnection {
 				
 				playerOne = 0;
 				playerTwo = 0;
+				*/
 			
 			}
-			else
-				callback.accept("Player(s) still need to select hand");
+				
 		}
 		else
 			connthread.out.writeObject(data);

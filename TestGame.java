@@ -47,40 +47,4 @@ class TestGame {
 		assertTrue("Game Command: Spock conversion invalid", Game.stringToCommand("PLAY_SPOCK").equals(GameCommands.PLAY_SPOCK));
 		
 	}
-	
-	@Test
-	void testRoundOne() {
-		
-		assertEquals("Game round incorrect", 1, Game.scoreHand("PLAY_ROCK", "PLAY_SCISSORS"));
-		
-	}
-	
-	@Test
-	void testRoundTwo() {
-		
-		assertEquals("Game round incorrect", 2, Game.scoreHand("PLAY_SCISSORS", "PLAY_ROCK"));
-		
-	}
-	
-	@Test
-	void testRoundThree() {
-		
-		assertEquals("Game round incorrect", 0, Game.scoreHand("PLAY_ROCK", "PLAY_ROCK"));
-		
-	}
-	
-	@Test
-	void testRoundFour() {
-		
-		assertEquals("Game round incorrect", 2, Game.scoreHand("PLAY_ROCK", "PLAY_SPOCK"));
-		
-	}
-	
-	@Test
-	void testRoundFive() {
-		
-		assertEquals("Game round incorrect", 1, Game.scoreHand("PLAY_ROCK", "PLAY_SCISSORS"));
-		
-	}
-
 }
