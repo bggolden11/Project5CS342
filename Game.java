@@ -21,7 +21,7 @@ public class Game {
 	public enum GameCommands
 	{
 		CLIENT_WHOAMI,
-		CLIENT_CHALLENGE,
+		CLIENT_RESPONSE,
 		CLIENT_LOBBY,
 		
 		PLAY_ROCK,

@@ -181,18 +181,18 @@ public class FXNet extends Application {
 		VBox vbox = new VBox(20, messages);
 
 		TextField textPlayerSelect = new TextField();
-		Button btnChallenge = new Button("Challenge Player");
+		Button btnSentenceSubmit = new Button("Select Sentence #");
 		Button btnWho = new Button("Who Am I?");
 		Button btnLob = new Button("Who can I Play?");
 		Button btnExit = new Button("Exit Game");
 		
-		btnChallenge.setOnAction(event -> {
+		btnSentenceSubmit.setOnAction(event -> {
 			if(Game.isInteger(textPlayerSelect.getText()))
 			{
-				messages.appendText(sendCommand(GameCommands.CLIENT_CHALLENGE, textPlayerSelect.getText()) + NEWLINE);
+				messages.appendText(sendCommand(GameCommands.CLIENT_RESPONSE, textPlayerSelect.getText()) + NEWLINE);
 			}
 			else
-				messages.appendText("Enter Player ID # and press Challenge" + NEWLINE);
+				messages.appendText("Enter Sentence # and press Enter" + NEWLINE);
 		});
 		
 		btnWho.setOnAction(event -> {
@@ -214,7 +214,7 @@ public class FXNet extends Application {
 
 		});
 		
-		HBox hboxTwo = new HBox(20, textPlayerSelect, btnChallenge, btnLob, btnWho, btnExit);
+		HBox hboxTwo = new HBox(20, textPlayerSelect, btnSentenceSubmit, btnLob, btnWho, btnExit);
 		
 		BorderPane border = new BorderPane();
 		border.setTop(hboxTwo);

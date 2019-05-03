@@ -164,53 +164,12 @@ public abstract class NetworkConnection {
 						}
 						getClientByID(id).sendData(lobby);
 					}
-					else if(Game.matchCommand(dataString, GameCommands.CLIENT_CHALLENGE))
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_RESPONSE))
 					{
-						int clientID;
 						//messages.appendText("Player not found" + NEWLINE);
-						String clientStringID = dataString.replace(GameCommands.CLIENT_CHALLENGE.toString(), "");
-						if(!Game.isInteger(clientStringID))
-						{
-							getClientByID(id).sendData("Invalid Challenge.");
-						}
-						else
-						{
-							clientID = Integer.parseInt(clientStringID);
-							boolean foundClient = false;
-							if(clientID == id)
-								getClientByID(id).sendData("You cannot play yourself.");
-							else if((playerOne + playerTwo) > 0)
-								getClientByID(id).sendData("Match currently in progress.");
-							else
-							{
-								for(ClientInfo client : clients)
-								{
-									if(clientID == client.getID())
-									{
-										foundClient = true;
-										if(getClientByID(clientID).isBusy())
-										{
-											getClientByID(clientID).sendData("Player " + id + " wanted to challenge you. You are already in a match.");
-											getClientByID(id).sendData("Player " + clientID + " is already in a match.");
-										}
-										else
-										{
-											getClientByID(id).startRound(clientID);
-											getClientByID(clientID).startRound(id);
-											
-											playerOne = clientID;
-											playerTwo = id;
-											
-											getClientByID(id).sendData("Challenged Player " + clientID + ", press any action to play.");
-											getClientByID(clientID).sendData("Player " + id + " has challenged you, press any action to play.");
-										}
-									}
-								}
-								
-								if(!foundClient)
-									getClientByID(id).sendData("Player " + clientStringID + " not found.");
-							}
-						}
+						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
+						getClientByID(id).setResponse(clientStringResponse);
+						getClientByID(id).sendData("Sentence recieved, wait for results.");
 						
 					}
 					else //no commands detected
