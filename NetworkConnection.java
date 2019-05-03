@@ -27,6 +27,9 @@ public abstract class NetworkConnection {
 	
 	private final int MAX_PLAYERS = 8;
 	
+	private final String NEWLINE = "\n";
+	private final String DBLNEWLINE = "\n\n";
+	
 	public NetworkConnection(Consumer<Serializable> callback) {
 		this.callback = callback;
 		connthread = new ConnThread();
@@ -71,7 +74,8 @@ public abstract class NetworkConnection {
 		if(isServer())
 		{
 			int responsesReady = 0;
-
+			String dataString = "";
+			
 			for(ClientInfo client : clients)
 			{
 				if(!client.hasResponded())
@@ -80,45 +84,26 @@ public abstract class NetworkConnection {
 					
 				}
 				else
+				{
+					dataString += client.getID() + ": " + client.getResponse() + NEWLINE;
 					responsesReady++;
+				}
 			}
 			
-			if(responsesReady == clients.size())
-			{
-				callback.accept("ready");
-			}
-			else
-			{
-				callback.accept("not ready");
-			}
-			
-			if(true)
-			{
-				/*
-				
-				final String dataString = "\nPlayer " + clientOne.getID() + " (" + clientOne.getPoints() + " points) played " + clientOne.getResponse() + "\n" + 
-						"Player " + clientTwo.getID() + " (" + clientTwo.getPoints() + " points) played " + clientTwo.getResponse() + "\n"
-							+ (winnerID > 0 ? 
-								("Player " + winnerID + " has won the round.") : 
-								("This round is a tie.")) + "\n";
-								
-
-				callback.accept(dataString);
-				
-				clients.forEach((client) -> {
+			if(responsesReady == clients.size()) //every client has submitted a response
+			{	
+					
+				for(ClientInfo client : clients)
+				{
 					try {
 						client.sendData(dataString);
 						client.resetRound(); //clear opponents
 						client.clearResponse();
+							
 					} catch (IOException e) {}
-				});
-				
-				playerOne = 0;
-				playerTwo = 0;
-				*/
-			
+				}
+				callback.accept("Vote by response # \n" + dataString);
 			}
-				
 		}
 		else
 			connthread.out.writeObject(data);
@@ -247,7 +232,7 @@ public abstract class NetworkConnection {
 							
 							if(getClientByID(playerOne).hasResponded() && getClientByID(playerTwo).hasResponded())
 							{
-								callback.accept("Ready to announce winner");
+								callback.accept("Ready to view responses");
 							}
 						}
 						else

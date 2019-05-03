@@ -3,6 +3,9 @@ package projectFive;
 import java.io.*;
 
 public class Game {
+
+	private final String NEWLINE = "\n";
+	private final String DBLNEWLINE = "\n\n";
 	
 	/*resource: https://www.baeldung.com/java-check-string-number*/
 	public static boolean isInteger(String str) {
