@@ -1,4 +1,4 @@
-package sample;
+package egs;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -7,273 +7,295 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.io.IOException;
 
-import static java.lang.Integer.parseInt;
-import static java.lang.Integer.sum;
+import egs.Game.GameCommands;
 
+public class FXNet extends Application {
 
-import java.time.format.TextStyle;
+	private static boolean isServer;
 
+	private NetworkConnection conn;
+	private TextArea messages = new TextArea();
+	private int port = 0;
+	private int id;
+	private String ip = "127.0.0.1"; /* Default IP */
+	
+	private final String NEWLINE = "\n";
+	private final String DBLNEWLINE = "\n\n";
 
-public class FXNet extends Application{
-
-    private boolean isServer = false;
-    int score = 0;
-    String newIpAddress;
-    TextField getIp;
-    int newPort;
-    TextField getPort;
-    Button btn, btn2, btn3, btn4, btn5, btn6, btn7;
-    Button connect = new Button("Connect to Server");
-    Button rock, paper, scissors, lizard, spock;
-    Scene firstScene;
-    Client conn;
-    //private NetworkConnection  conn = isServer ? createServer() : createClient();
-    private TextArea messages = new TextArea();
-
-
-    private Scene createContent() {
-		/*messages.setPrefHeight(550);
-		TextField input = new TextField();
+	/* Server GUI */
+	
+	/* Main Menu */
+	private Parent initServerMenuUI(Stage primaryStage) {
+		primaryStage.setTitle(isServer ? "Server Menu" : "Client Menu");
 		
-		input.setOnAction(event -> {
-			String message = isServer ? "Server: " : "Client: ";
-			message += input.getText();
-			input.clear();
-			
-			messages.appendText(message + "\n");
+		TextField textPort = new TextField("Enter Port ####");
+		Button btnStart = new Button("Start Server");
+		Button btnExit = new Button("Exit Game");
+
+		HBox root = new HBox(20, textPort, btnStart, btnExit);
+		root.setPrefSize(600, 600);
+
+		btnStart.setOnAction(event -> {
+			if (!Game.isInteger(textPort.getText()))
+				textPort.setText("Integers Only eg: 5555");
+			else
+				port = Integer.parseInt(textPort.getText());
+
+			conn = createServer();
 			try {
-				conn.send(message);
+				conn.startConn();
+
+				primaryStage.setScene(new Scene(initServerGameUI(primaryStage)));
+			} catch (Exception e) {
+				System.out.println("Error starting connection.");
 			}
-			catch(Exception e) {
-				
+
+		});
+
+		btnExit.setOnAction(event -> {
+			try {
+				conn.closeConn();
+			} catch (Exception e) {}
+
+			System.exit(0);
+
+		});
+
+		return root;
+	}
+	
+	/* Run Games */
+	private Parent initServerGameUI(Stage primaryStage) {
+		messages.setPrefHeight(550);
+
+		primaryStage.setTitle(ip + " " + (isServer ? "Game Server " : "Client Player") + port);
+
+		TextField textPortNum = new TextField();
+		textPortNum.setText("5555");
+		Button btnAnnounce = new Button("Announce Winner");
+		Button btnExit = new Button("Exit Game");
+
+		btnAnnounce.setOnAction(event -> {
+			try {
+				conn.send("");
+			} catch (Exception e) {
+				System.out.println("Error sending command data.");
 			}
-			
+		});
+
+		btnExit.setOnAction(event -> {
+			try {
+				conn.closeConn();
+			} catch (Exception e) {
+			}
+
+			System.exit(0);
+
+		});
+
+		VBox root = new VBox(20, messages, btnAnnounce, btnExit);
+		root.setPrefSize(600, 600);
+
+		return root;
+
+	}
+
+	/* Client GUI */
+	
+	/* Main Menu */
+	private Parent initClientMenuUI(Stage primaryStage) {
+		TextField textIP = new TextField("127.0.0.1");
+		TextField textPort = new TextField("Enter Port ####");
+		Button btnStart = new Button("Connect to Server");
+		Button btnExit = new Button("Exit Game");
+
+		HBox root = new HBox(20, textIP, textPort, btnStart, btnExit);
+		root.setPrefSize(650, 100);
+
+		btnStart.setOnAction(event -> {
+			if (!Game.isInteger(textPort.getText()))
+				textPort.setText("Integers Only eg: 5555");
+			else if (textIP.getText().equals(""))
+				textIP.setText("127.0.0.1");
+			else {
+				ip = textIP.getText();
+				port = Integer.parseInt(textPort.getText());
+
+				conn = createClient();
+				try {
+					conn.startConn();
+					primaryStage.setScene(new Scene(initClientGameUI(primaryStage)));
+				} catch (Exception e) {
+					System.out.println("Error sending command data.");
+				}
+			}
+		});
+
+		return root;
+	}
+
+	/* Run Game */
+	private Parent initClientGameUI(Stage primaryStage) {
+		//messages.setPrefHeight(550);
+
+		primaryStage.setTitle(ip + " " + (isServer ? "Server GUI " : "Client GUI ") + port);
+
+		Button btnRock = new Button("Rock");
+		Button btnPaper = new Button("Paper");
+		Button btnScissors = new Button("Scissors");
+		Button btnLizard = new Button("Lizard");
+		Button btnSpock = new Button("Spock");
+
+		btnRock.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.PLAY_ROCK) + NEWLINE);
+		});
+
+		btnPaper.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.PLAY_PAPER) + NEWLINE);
+		});
+
+		btnScissors.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.PLAY_SCISSORS) + NEWLINE);
+		});
+
+		btnLizard.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.PLAY_LIZARD) + NEWLINE);
+		});
+
+		btnSpock.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.PLAY_SPOCK) + NEWLINE);
 		});
 		
-		VBox root = new VBox(20, messages, input);
-		root.setPrefSize(600, 600);
+
+		HBox hbox = new HBox(20, btnRock, btnPaper, btnScissors, btnLizard, btnSpock);
+		//hbox.setPrefSize(600, 600);
 		
-		return root;*/
-        btn4 = new Button();
-        btn4.setText("Enter IP Address and Port");
 
-        getIp = new TextField();
-        getPort = new TextField();
-        getPort.setPrefWidth(60);
+		VBox vbox = new VBox(20, messages);
 
-        BorderPane centerPane = new BorderPane();
-        HBox layout = new HBox(0);
-        layout.getChildren().add(btn4);
-        layout.getChildren().add(getIp);
-        layout.getChildren().add(getPort);
-        layout.getChildren().add(connect);
-        TextArea messages2 = new TextArea();
-        messages2.setPrefHeight(550);
-        centerPane.setCenter(layout);
-        Scene firstScene = new Scene(centerPane);
-
-        return firstScene;
-
-
-    }
-    private Scene createClientGUI(Stage primaryStage) {
-        messages.setPrefHeight(250);
-        /*TextField input = new TextField();
-
-        input.setOnAction(event -> {
-            String message = isServer ? "Server: " : "Client: ";
-            message += input.getText();
-            input.clear();
-
-            messages.appendText(message + "\n");
-            try {
-                conn.send(message);
-            }
-            catch(Exception e) {
-
-            }
-
-        });*/
-
-        btn2 = new Button();
-        btn2.setText("Exit");
-        btn2.setOnAction(event -> {
-            try {
-                conn.send("Exit");
-                primaryStage.close();
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-        btn3 = new Button();
-        btn3.setText("Play Again");
-        btn3.setOnAction(event -> {
-            try {
-                conn.send("Play Again");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-
-        // Clickable Buttons
-        rock = new Button();
-        rock.setText("Rock");
-        rock.setOnAction(event -> {
-            try {
-                conn.send("User Played Rock");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-        paper = new Button();
-        paper.setText("Paper");
-        paper.setOnAction(event -> {
-            try {
-                conn.send("User Played Paper");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-        scissors = new Button();
-        scissors.setText("Scissors");
-        scissors.setOnAction(event -> {
-            try {
-                conn.send("User Played Scissors");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-        lizard = new Button();
-        lizard.setText("Lizard");
-        lizard.setOnAction(event -> {
-            try {
-                conn.send("User Played Lizard");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-        spock = new Button();
-        spock.setText("Spock");
-        spock.setOnAction(event -> {
-            try {
-                conn.send("User Played Spock");
-            }
-            catch (Exception invalidHand){
-
-            }
-        });
-
-        /*VBox clientL = new VBox(20, messages, input);
-        clientL.getChildren().add(btn);
-        clientL.getChildren().add(btn2);
-        clientL.getChildren().add(btn3);
-        //clientL.getChildren().add(rock);
-        //clientL.getChildren().add(paper);
-        //clientL.getChildren().add(scissors);
-        //clientL.getChildren().add(lizard);
-        //clientL.getChildren().add(spock);
-        //clientL.setPrefSize(600, 600);
-        */
-        VBox root = new VBox(20, messages);
-        root.setPrefSize(250, 250);
-
-        HBox clientL = new HBox(20);
-        clientL.getChildren().add(btn2);
-        clientL.getChildren().add(btn3);
-        //clientL.setPrefSize(600, 600);
-
-        HBox options = new HBox(60);
-        options.getChildren().add(rock);
-        options.getChildren().add(paper);
-        options.getChildren().add(scissors);
-        options.getChildren().add(lizard);
-        options.getChildren().add(spock);
-        //options.setPrefSize(50, 50);
-
-        BorderPane main = new BorderPane();
-        //main.setPrefSize(600, 600);
-        main.setTop(root);
-        main.setCenter(clientL);
-        main.setBottom(options);
-        firstScene = new Scene(main);
-
-        return firstScene;
-
-    }
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        // TODO Auto-generated method stub
-        primaryStage.setScene(createContent());
-        connect.setOnAction(event -> {
-            newIpAddress = getIp.getText();
-            int convertPort = parseInt(getPort.getText());
-            newPort = convertPort;
-            conn=createClient(newIpAddress,newPort);
-            // try and catch exception
-            try {
-                conn.startConn();
-            }
-            catch (Exception connection){
-                connection.printStackTrace();
-            }
-
-            // set the scene
-            primaryStage.setScene(createClientGUI(primaryStage));
-
-        });
-        primaryStage.show();
-
-    }
-    //@Override
-    /*public void start(Stage primaryStage) throws Exception {
-        // TODO Auto-generated method stub
-        primaryStage.setScene(new Scene(createClientGUI()));
-        primaryStage.show();
-
-    }*/
+		TextField textPlayerSelect = new TextField();
+		Button btnChallenge = new Button("Challenge Player");
+		Button btnWho = new Button("Who Am I?");
+		Button btnLob = new Button("Who can I Play?");
+		Button btnExit = new Button("Exit Game");
+		
+		btnChallenge.setOnAction(event -> {
+			if(Game.isInteger(textPlayerSelect.getText()))
+			{
+				messages.appendText(sendCommand(GameCommands.CLIENT_CHALLENGE, textPlayerSelect.getText()) + NEWLINE);
+			}
+			else
+				messages.appendText("Enter Player ID # and press Challenge" + NEWLINE);
+		});
+		
+		btnWho.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.CLIENT_WHOAMI) + NEWLINE);
+		});
+		
+		btnLob.setOnAction(event -> {
+			messages.appendText(sendCommand(GameCommands.CLIENT_LOBBY) + NEWLINE);
+		});
 
 
-    /*@Override
-	public void init() throws Exception{
-		//conn.startConn();
-	}*/
+		btnExit.setOnAction(event -> {
+			try {
+				conn.closeConn();
+			} catch (Exception e) {
+			}
 
-    @Override
-    public void stop() throws Exception{
-        conn.closeConn();
-    }
+			System.exit(0);
 
-    private Server createServer() {
-        return new Server(5555, data-> {
-            Platform.runLater(()->{
-                messages.appendText(data.toString() + "\n");
-            });
-        });
-    }
+		});
+		
+		HBox hboxTwo = new HBox(20, textPlayerSelect, btnChallenge, btnLob, btnWho, btnExit);
+		
+		BorderPane border = new BorderPane();
+		border.setTop(hboxTwo);
+		border.setCenter(vbox);
+		border.setBottom(hbox);
 
-    private Client createClient(String ip, int port) {
-        return new Client(ip, port, data -> {
-            Platform.runLater(()->{
-                messages.appendText(data.toString() + "\n");
-            });
-        });
-    }
+		return border;
+	}
+
+	/* Send Commands between Server/Client */
+	String sendCommand(GameCommands command) {
+		return sendCommand(command, "");
+	}
+	
+	String sendCommand(GameCommands command, String param) {
+		try {
+			conn.send(command.toString() + param);
+		} catch (Exception e) {
+			System.out.println("Error sending command data.");
+		}
+		return command.toString() + param;
+	}
+
+	/* Must be called to define whether instance will be Server */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		try {
+			if (args[0].equals("-s"))
+				isServer = true;
+			else if (args[0].equals("-c"))
+				isServer = false;
+			else {
+				System.out.println("Usage: -s for Server, -c for Client");
+				System.exit(-1);
+			}
+		} catch (Exception e) {
+			System.out.println("Fatal Error... are you trying to launch without arguments?");
+			System.exit(-1);
+		}
+
+		launch(args);
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		// TODO Auto-generated method stub
+
+		primaryStage.setScene(
+				isServer ? new Scene(initServerMenuUI(primaryStage)) : new Scene(initClientMenuUI(primaryStage)));
+		primaryStage.show();
+
+	}
+
+	@Override
+	public void init() throws Exception {
+
+	}
+
+	@Override
+	public void stop() throws Exception {
+		try {
+			conn.closeConn();
+		} catch (Exception e) {
+			
+		}
+	}
+
+	private Server createServer() {
+		return new Server(port, data -> {
+			Platform.runLater(() -> {
+				messages.appendText(data.toString() + DBLNEWLINE);
+			});
+		});
+	}
+
+	private Client createClient() {
+		return new Client(ip, port, data -> {
+			Platform.runLater(() -> {
+				messages.appendText(data.toString() + DBLNEWLINE);
+			});
+		});
+	}
 
 }
