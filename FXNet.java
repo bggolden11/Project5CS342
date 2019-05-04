@@ -31,7 +31,6 @@ public class FXNet extends Application {
 
 	/* Server GUI */
 	
-	/* Main Menu */
 	private Parent initServerMenuUI(Stage primaryStage) {
 		primaryStage.setTitle(isServer ? "Server Menu" : "Client Menu");
 		
@@ -79,7 +78,7 @@ public class FXNet extends Application {
 
 		TextField textPortNum = new TextField();
 		textPortNum.setText("5555");
-		Button btnAnnounce = new Button("Announce Winner");
+		Button btnAnnounce = new Button("View Responses");
 		Button btnExit = new Button("Exit Game");
 
 		btnAnnounce.setOnAction(event -> {
