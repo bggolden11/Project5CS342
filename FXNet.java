@@ -1,298 +1,323 @@
-package projectFive;
+package sample;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import projectFive.Game.GameCommands;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class FXNet extends Application {
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.sum;
 
-	private static boolean isServer;
 
-	private NetworkConnection conn;
+public class FXNet extends Application{
+	String IPAddressNew;
+	int portNew;
+	Scene scene2;
+	Button display = new Button("Input IP and port");
+	Button sumbit = new Button("Conenct");
+
+	Button exit = new Button("Exit");
+	Button playAgain = new Button("Play Again");
+	Client conn1;// = createClient("127.0.0.1",5555);
+	TextField IPAddress;
+	TextField port;
+
+	Button card1 = new Button("jobs");
+	Button card2 = new Button("men");
+	Button card3 = new Button("Powerful");
+	Button card4 = new Button("Prancing");
+	Button card5 = new Button("Repression");
+	Label Hand = new Label("Your hand");
+	List<String> playerCards = new ArrayList<>();
+
+
+	private boolean isServer = false;
+	
+//	private NetworkConnection  conn = isServer ? createServer() : createClient();
 	private TextArea messages = new TextArea();
-	private int port = 0;
-	private int id;
-	private String ip = "127.0.0.1"; /* Default IP */
+
+
+
+
+
+
+
+
 	
-	private final String NEWLINE = "\n";
-	private final String DBLNEWLINE = "\n\n";
+	private Scene createContent() {
 
-	/* Server GUI */
-	
-	private Parent initServerMenuUI(Stage primaryStage) {
-		primaryStage.setTitle(isServer ? "Server Menu" : "Client Menu");
-		
-		TextField textPort = new TextField("Enter Port ####");
-		Button btnStart = new Button("Start Server");
-		Button btnExit = new Button("Exit Game");
+		IPAddress = new TextField();
+		port = new TextField();
+		port.setPrefWidth(60);
 
-		HBox root = new HBox(20, textPort, btnStart, btnExit);
-		root.setPrefSize(600, 600);
+		BorderPane borderPaneCenter = new BorderPane();
+		HBox centerBox = new HBox(0);
+		centerBox.getChildren().add(display);
+		centerBox.getChildren().add(IPAddress);
+		centerBox.getChildren().add(port);
+		centerBox.getChildren().add(sumbit);
+		TextArea messages2 = new TextArea();
+		messages2.setPrefHeight(550);
+		borderPaneCenter.setCenter(centerBox);
 
-		btnStart.setOnAction(event -> {
-			if (!Game.isInteger(textPort.getText()))
-				textPort.setText("Integers Only eg: 5555");
-			else
-				port = Integer.parseInt(textPort.getText());
 
-			conn = createServer();
-			try {
-				conn.startConn();
 
-				primaryStage.setScene(new Scene(initServerGameUI(primaryStage)));
-			} catch (Exception e) {
-				System.out.println("Error starting connection.");
-			}
-
-		});
-
-		btnExit.setOnAction(event -> {
-			try {
-				conn.closeConn();
-			} catch (Exception e) {}
-
-			System.exit(0);
-
-		});
-
-		return root;
-	}
-	
-	/* Run Games */
-	private Parent initServerGameUI(Stage primaryStage) {
-		messages.setPrefHeight(550);
-
-		primaryStage.setTitle(ip + " " + (isServer ? "Game Server " : "Client Player") + port);
-
-		TextField textPortNum = new TextField();
-		textPortNum.setText("5555");
-		Button btnAnnounce = new Button("View Responses");
-		Button btnExit = new Button("Exit Game");
-
-		btnAnnounce.setOnAction(event -> {
-			try {
-				conn.send("");
-			} catch (Exception e) {
-				System.out.println("Error sending command data.");
-			}
-		});
-
-		btnExit.setOnAction(event -> {
-			try {
-				conn.closeConn();
-			} catch (Exception e) {
-			}
-
-			System.exit(0);
-
-		});
-
-		VBox root = new VBox(20, messages, btnAnnounce, btnExit);
-		root.setPrefSize(600, 600);
-
-		return root;
-
-	}
-
-	/* Client GUI */
-	
-	/* Main Menu */
-	private Parent initClientMenuUI(Stage primaryStage) {
-		TextField textIP = new TextField("127.0.0.1");
-		TextField textPort = new TextField("Enter Port ####");
-		Button btnStart = new Button("Connect to Server");
-		Button btnExit = new Button("Exit Game");
-
-		HBox root = new HBox(20, textIP, textPort, btnStart, btnExit);
-		root.setPrefSize(650, 100);
-
-		btnStart.setOnAction(event -> {
-			if (!Game.isInteger(textPort.getText()))
-				textPort.setText("Integers Only eg: 5555");
-			else if (textIP.getText().equals(""))
-				textIP.setText("127.0.0.1");
-			else {
-				ip = textIP.getText();
-				port = Integer.parseInt(textPort.getText());
-
-				conn = createClient();
-				try {
-					conn.startConn();
-					primaryStage.setScene(new Scene(initClientGameUI(primaryStage)));
-				} catch (Exception e) {
-					System.out.println("Error sending command data.");
+		/*IPAddress.setOnAction(event ->
+				{
+					IPAddressNew = IPAddress.getText();
 				}
-			}
-		});
+				);*/
+/*		sumbit.setOnAction(e->
+				{
+					IPAddressNew = IPAddress.getText();
+					portNew = parseInt(port.getText());
+				}
+				);
+*/
 
-		return root;
+
+
+		// TODO Auto-generated method stub
+		//primaryStage.setScene(new Scene(createContent()));
+		Scene scene1 = new Scene(borderPaneCenter);
+
+		return scene1;
+
+
+
+
+
+
+
+
+
 	}
-
-	/* Run Game */
-	private Parent initClientGameUI(Stage primaryStage) {
 		//messages.setPrefHeight(550);
-
-		primaryStage.setTitle(ip + " " + (isServer ? "Server GUI " : "Client GUI ") + port);
-
-		Button btnRock = new Button("Rock");
-		Button btnPaper = new Button("Paper");
-		Button btnScissors = new Button("Scissors");
-		Button btnLizard = new Button("Lizard");
-		Button btnSpock = new Button("Spock");
-
-		btnRock.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_ROCK) + NEWLINE);
-		});
-
-		btnPaper.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_PAPER) + NEWLINE);
-		});
-
-		btnScissors.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_SCISSORS) + NEWLINE);
-		});
-
-		btnLizard.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_LIZARD) + NEWLINE);
-		});
-
-		btnSpock.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_SPOCK) + NEWLINE);
-		});
+		/*TextField input = new TextField();
 		
-
-		HBox hbox = new HBox(20, btnRock, btnPaper, btnScissors, btnLizard, btnSpock);
-		//hbox.setPrefSize(600, 600);
-		
-
-		VBox vbox = new VBox(20, messages);
-
-		TextField textPlayerSelect = new TextField();
-		Button btnChallenge = new Button("Challenge Player");
-		Button btnWho = new Button("Who Am I?");
-		Button btnLob = new Button("Who can I Play?");
-		Button btnExit = new Button("Exit Game");
-		
-		btnChallenge.setOnAction(event -> {
-			if(Game.isInteger(textPlayerSelect.getText()))
-			{
-				messages.appendText(sendCommand(GameCommands.CLIENT_CHALLENGE, textPlayerSelect.getText()) + NEWLINE);
-			}
-			else
-				messages.appendText("Enter Player ID # and press Challenge" + NEWLINE);
-		});
-		
-		btnWho.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.CLIENT_WHOAMI) + NEWLINE);
-		});
-		
-		btnLob.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.CLIENT_LOBBY) + NEWLINE);
-		});
-
-
-		btnExit.setOnAction(event -> {
+		input.setOnAction(event -> {
+			String message = isServer ? "Server: " : "Client: ";
+			message += input.getText();
+			input.clear();
+			
+			messages.appendText(message + "\n");
 			try {
-				conn.closeConn();
-			} catch (Exception e) {
+				conn.send(message);
 			}
+			catch(Exception e) {
+				
+			}
+			
+		});
 
-			System.exit(0);
+		VBox root = new VBox(20, messages, input);
+		root.setPrefSize(600, 600);
+		
+		return root;
+		
+				
+
+	}*/
+
+
+
+	private Scene InGame(Stage PrimaryStage)
+	{
+
+
+
+		messages.setPrefHeight(550);
+		VBox root = new VBox(20, messages);
+
+		root.setPrefSize(600, 600);
+		VBox temp = new VBox(30);
+
+		HBox game = new HBox(30);
+
+
+
+
+		game.getChildren().addAll(card1,card2,card3,card4,card5,exit,playAgain);
+		temp.getChildren().add(Hand);
+		temp.getChildren().add(game);
+		BorderPane borderPane2 = new BorderPane();
+		borderPane2.setCenter(temp);
+		borderPane2.setTop(root);
+		card1.setOnAction(e->
+		{
+			try{
+				conn1.send(card1.getText());
+			}
+			catch(Exception e1)
+			{
+
+			}
+		});
+		card2.setOnAction(e->
+		{
+			try{
+				conn1.send(card2.getText());
+			}
+			catch(Exception e1)
+			{
+
+			}
+		});
+		card3.setOnAction(e->
+		{
+			try{
+				conn1.send(card3.getText());
+			}
+			catch(Exception e1)
+			{
+
+			}
+		});
+		card4.setOnAction(e->
+		{
+			try{
+				conn1.send(card1.getText());
+			}
+			catch(Exception e1)
+			{
+
+			}
+		});
+		card5.setOnAction(e->
+		{
+			try{
+				conn1.send(card5.getText());
+			}
+			catch(Exception e1)
+			{
+
+			}
+		});
+
+		scene2 = new Scene(borderPane2);
+		//messages.appendText();
+		/*
+		lizard.setOnAction(e->
+		{
+			try {
+				conn1.send("Lizard");
+			}
+			catch(Exception e2){
+
+			}
+		});
+		paper.setOnAction(e->
+				{
+					try {
+						conn1.send("Paper");
+					}
+					catch(Exception e3){}
+				});
+		scissor.setOnAction(e->
+		{
+			try {
+				conn1.send("Scissor");
+			}
+			catch(Exception e3){}
+		});
+		rock.setOnAction(e->
+		{
+			try {
+				conn1.send("Rock");
+			}
+			catch(Exception e4){}
+
 
 		});
-		
-		HBox hboxTwo = new HBox(20, textPlayerSelect, btnChallenge, btnLob, btnWho, btnExit);
-		
-		BorderPane border = new BorderPane();
-		border.setTop(hboxTwo);
-		border.setCenter(vbox);
-		border.setBottom(hbox);
+		spock.setOnAction(e->
+		{
+			try {
+				conn1.send("Spock");
+			}
+			catch (Exception e4){}
+		});
+		playAgain.setOnAction(e->
+		{
+			try {
+				conn1.send("Play");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		});
+		exit.setOnAction(e->
+		{
+			try {
+				conn1.send("Exit");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			PrimaryStage.close();
 
-		return border;
+		});*/
+		return scene2;
 	}
 
-	/* Send Commands between Server/Client */
-	String sendCommand(GameCommands command) {
-		return sendCommand(command, "");
-	}
-	
-	String sendCommand(GameCommands command, String param) {
-		try {
-			conn.send(command.toString() + param);
-		} catch (Exception e) {
-			System.out.println("Error sending command data.");
-		}
-		return command.toString() + param;
-	}
-
-	/* Must be called to define whether instance will be Server */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		try {
-			if (args[0].equals("-s"))
-				isServer = true;
-			else if (args[0].equals("-c"))
-				isServer = false;
-			else {
-				System.out.println("Usage: -s for Server, -c for Client");
-				System.exit(-1);
-			}
-		} catch (Exception e) {
-			System.out.println("Fatal Error... are you trying to launch without arguments?");
-			System.exit(-1);
-		}
-
 		launch(args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		// TODO Auto-generated method stub
+		primaryStage.setScene(createContent());
+		sumbit.setOnAction(e->
+				{
+					IPAddressNew = IPAddress.getText();
+					portNew = parseInt(port.getText());
+					 conn1=createClient(IPAddressNew,portNew);
+					try {
+						conn1.startConn();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 
-		primaryStage.setScene(
-				isServer ? new Scene(initServerMenuUI(primaryStage)) : new Scene(initClientMenuUI(primaryStage)));
+					primaryStage.setScene(InGame(primaryStage));
+				}
+		);
 		primaryStage.show();
 
 	}
-
+	
 	@Override
-	public void init() throws Exception {
-
+	public void init() throws Exception{
+		//conn1.startConn();
 	}
-
+	
 	@Override
-	public void stop() throws Exception {
-		try {
-			conn.closeConn();
-		} catch (Exception e) {
-			
-		}
+	public void stop() throws Exception{
+		conn1.closeConn();
 	}
-
+	
 	private Server createServer() {
-		return new Server(port, data -> {
-			Platform.runLater(() -> {
-				messages.appendText(data.toString() + DBLNEWLINE);
+		return new Server(5555, data-> {
+			Platform.runLater(()->{
+
+				messages.appendText(data.toString() + "\n");
 			});
 		});
 	}
-
-	private Client createClient() {
+	
+	private Client createClient(String ip, int port) {
 		return new Client(ip, port, data -> {
-			Platform.runLater(() -> {
-				messages.appendText(data.toString() + DBLNEWLINE);
+			Platform.runLater(()->{
+				messages.appendText(data.toString() + "\n");
 			});
 		});
 	}
