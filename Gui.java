@@ -37,12 +37,13 @@ class Deck {
     private int currentCard = 0; //keeps track of what card to deal
     private int totalNumCards = 0;
     private int totalNumQuestions = 0;
+    private int currentQuestion = 0;
     private ArrayList<Card> Deck = new ArrayList<>(); //contains all the cards for deck
     private ArrayList<Card> Scenarios = new ArrayList<>(); //contains scenarios for cards against humanity
 
 
     //what the constructor calls to create the Deck
-    void createDeck() {
+    private void createDeck() {
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader("src/answers.txt"));
@@ -71,8 +72,8 @@ class Deck {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Shuffle(); //shuffles deck
-
+        Shuffle(Deck); //shuffles deck
+        Shuffle(Scenarios); //shuffles Scenarios
 
     }
 
@@ -84,27 +85,31 @@ class Deck {
     void setCurrentCard(int currentCard) {
         this.currentCard = currentCard;
     }
-    //used to print deck for testing card creation
-     /*void PrintDeck(){
-        for (Card card : Deck) {
-            System.out.println(card.getVal() + " of " + card.getSentence());
-        }
-    }*/
+
     //shufffles the deck of cards to make sure cards dealt are random
-    void Shuffle() {
+    void Shuffle( ArrayList<Card> Deck) {
         Collections.shuffle(Deck);
         Collections.shuffle(Deck);
-        Collections.shuffle(Scenarios);
-        Collections.shuffle(Scenarios);
+
     }
     //deals a single card and when you reach the end of deck it shuffles and starts at 0 index
     Card dealCard(){
         if(currentCard < totalNumCards){
             return Deck.get(currentCard++);
         } else {
-            Shuffle();
+            Shuffle(Deck);
             currentCard = 0;
             return Deck.get(currentCard);
+        }
+    }
+
+    Card dealQuestion(){
+        if(currentQuestion < totalNumQuestions){
+            return Scenarios.get(currentQuestion++);
+        } else {
+            Shuffle(Scenarios);
+            currentQuestion = 0;
+            return Deck.get(currentQuestion);
         }
     }
     //deals an entire hand using the dealCard function
@@ -121,7 +126,7 @@ class Deck {
 //************************************************************************************
 //CAH implimentation of the game
 class CAH  {
-    //data members of pitch
+    //data members of CAH
     private Deck card = new Deck(); //creates and constructs the deck for the game
     private ArrayList<Player> Players  = new ArrayList<>();  //list of players
     ArrayList<Card> CenterCards = new ArrayList<>(); //list of cards in the center
@@ -160,7 +165,6 @@ class CAH  {
     CAH(){
 
     }
-    //sets the trump card from gui
 
     //gets the deck of cards
     Deck getCard() {
@@ -284,35 +288,33 @@ public class Gui extends Application {
 //*****************************************************************************
         //first scene choosing player numbers and labels
 
-        primaryStage.setTitle("Pitch");
+        primaryStage.setTitle("Cards Against Humanity");
         Label players = new Label("How many Players");
-        Label score1 = new Label("Player 1 0");
-        Label score2 = new Label("Player 2 0");
-        Label score3 = new Label("Player 3 0");
-        Label score4 = new Label("Player 4 0");
+        Label QuestionCard = new Label(game.getCard().dealQuestion().getSentence());
+
         Button player2 = new Button("2 Players");
         Button player3 = new Button("3 Players");
         Button player4 = new Button("4 Players");
         //sets all num boxes to invisible
-        score1.setVisible(false);score2.setVisible(false);score3.setVisible(false);score4.setVisible(false);
+        QuestionCard.setVisible(false);
 
 
         //if two players then creates 2 players and makes textbox 1 and 2 visbible
         player2.setOnAction(event -> {
             myStage.setScene(sceneMap.get("gamePlay"));
-            score1.setVisible(true);score2.setVisible(true);score3.setVisible(false);score4.setVisible(false);
+            QuestionCard.setVisible(true);
         });
 
         //if two players then creates 3 players and makes textbox 1,2,3 visbible
         player3.setOnAction(event ->{
             myStage.setScene(sceneMap.get("gamePlay"));
-            score1.setVisible(true);score2.setVisible(true);score3.setVisible(true);score4.setVisible(false);
+            QuestionCard.setVisible(true);
         });
         //if two players then creates 4 players and makes textbox 1,2,3,4 visbible
 
         player4.setOnAction(event ->{
             myStage.setScene(sceneMap.get("gamePlay"));
-            score1.setVisible(true);score2.setVisible(true);score3.setVisible(true);score4.setVisible(true);
+            QuestionCard.setVisible(true);
         });
 
 //*****************************************************************************
@@ -354,19 +356,18 @@ public class Gui extends Application {
         EventHandler<ActionEvent> returnButton = event -> {
             Button b = (Button) event.getSource();
             //when card is clicked it adds player and ai player card to middle of deck and compares them to score points
+            game.CenterCards.clear();
 
-                game.CenterCards.clear();
                 if (b == card1) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(0));
                         game.getPlayers().get(i).getHand().set(0,game.getCard().dealCard());
                         card1.setText( game.getPlayers().get(i).getHand().get(0).getSentence());
-                        voteP1.setText( game.getCenter().get(0).getSentence());
                         voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
                     }
                 }
                 if (b == card2) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(1));
                         game.getPlayers().get(i).getHand().set(1,game.getCard().dealCard());
                         card2.setText( game.getPlayers().get(i).getHand().get(1).getSentence());
@@ -375,7 +376,7 @@ public class Gui extends Application {
                     }
                 }
                 if (b == card3) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(2));
                         game.getPlayers().get(i).getHand().set(2,game.getCard().dealCard());
                         card3.setText( game.getPlayers().get(i).getHand().get(2).getSentence());
@@ -384,7 +385,7 @@ public class Gui extends Application {
                     }
                 }
                 if (b == card4) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(3));
                         game.getPlayers().get(i).getHand().set(3,game.getCard().dealCard());
                         card4.setText( game.getPlayers().get(i).getHand().get(3).getSentence());
@@ -393,7 +394,7 @@ public class Gui extends Application {
                     }
                 }
                 if (b == card5) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(4));
                         game.getPlayers().get(i).getHand().set(4,game.getCard().dealCard());
                         card5.setText( game.getPlayers().get(i).getHand().get(4).getSentence());
@@ -402,7 +403,7 @@ public class Gui extends Application {
                     }
                 }
                 if (b == card6) {
-                    for (int i = 0; i < game.getNumplayers(); i++) {
+                    for (int i = 0; i < 4; i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(5));
                         game.getPlayers().get(i).getHand().set(5,game.getCard().dealCard());
                         card6.setText( game.getPlayers().get(i).getHand().get(5).getSentence());
@@ -412,11 +413,17 @@ public class Gui extends Application {
                 }
             voteP4.setMaxWidth(Double.MAX_VALUE); voteP3.setMaxWidth(Double.MAX_VALUE);
             voteP2.setMaxWidth(Double.MAX_VALUE); voteP1.setMaxWidth(Double.MAX_VALUE);
+
             voteP1.setText( game.getCenter().get(0).getSentence());
             voteP2.setText( game.getCenter().get(1).getSentence());
             voteP3.setText( game.getCenter().get(2).getSentence());
             voteP4.setText( game.getCenter().get(3).getSentence());
 
+
+
+            card1.setVisible(false);card2.setVisible(false);card3.setVisible(false);
+            card4.setVisible(false);card5.setVisible(false);card6.setVisible(false);
+            game.CenterCards.clear();
 
 
                 //b.setDisable(true); //disables buttons
@@ -427,29 +434,33 @@ public class Gui extends Application {
 
 
 
-
         //chooses clubs as trump cards
         voteP1.setOnAction(event -> {
             game.addVote(1);
             System.out.println("vote 1");
+            setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
+
         });
         //chooses spades as trump card
         voteP2.setOnAction(event -> {
             game.addVote(2);
             System.out.println("vote 2");
+            setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
         });
         //sets hearts as trump card
         voteP3.setOnAction(event -> {
             game.addVote(3);
             System.out.println("vote 3");
+            setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
         });
         //sets diamonds as trump card
         voteP4.setOnAction(event -> {
             System.out.println("vote 4");
-
             game.addVote(4);
+            setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
+
         });
         //sets cards as return buttons
         card1.setOnAction(returnButton); card2.setOnAction(returnButton); card3.setOnAction(returnButton);
@@ -460,22 +471,40 @@ public class Gui extends Application {
         BorderPane bottom = new BorderPane();
         HBox Cards = new HBox(10, card1,card2,card3,card4,card5,card6);
         HBox votes = new HBox(10, voteP1,voteP2,voteP3,voteP4);
-        votes.setPadding(new Insets(180) );
+        HBox scores = new HBox(5,QuestionCard);
+        scores.setPadding(new Insets(30));
+        bottom.setTop(scores);
         bottom.setCenter(votes);
         bottom.setBottom(Cards);
         Scene Gameplay = new Scene(bottom);
         sceneMap.put("gamePlay", Gameplay);
 
         BorderPane menu = new BorderPane();
-        menu.setPadding(new Insets(150));
         HBox PaneCenter = new HBox(10, players, player2, player3, player4);
-        HBox scores = new HBox(5,score1,score2,score3,score4);
-        scores.setPadding(new Insets(30));
+
 
         menu.setCenter(PaneCenter);
         Scene MainMenu = new Scene(menu);
         sceneMap.put("How Many Players", MainMenu);
         primaryStage.setScene(sceneMap.get("How Many Players"));
         primaryStage.show();
+    }
+
+    private void setCardsVisible(CAH game, Label questionCard, Button voteP1, Button voteP2, Button voteP3, Button voteP4) {
+        setVoteInvis(game, questionCard, voteP1, voteP2, voteP3, voteP4);
+        card1.setVisible(true);
+        card2.setVisible(true);
+        card3.setVisible(true);
+        card4.setVisible(true);
+        card5.setVisible(true);
+        card6.setVisible(true);
+    }
+
+    private void setVoteInvis(CAH game, Label questionCard, Button voteP1, Button voteP2, Button voteP3, Button voteP4) {
+        questionCard.setText(game.getCard().dealQuestion().getSentence());
+        voteP1.setVisible(false);
+        voteP2.setVisible(false);
+        voteP3.setVisible(false);
+        voteP4.setVisible(false);
     }
 }
