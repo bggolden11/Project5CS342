@@ -176,15 +176,20 @@ public abstract class NetworkConnection {
 						}
 						getClientByID(id).sendData(lobby);
 					}
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_ANSWER_OPT))
+					{
+						getClientByID(id).sendData("Your Deck");
+					}
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_SCENARIO))
+					{
+						getClientByID(id).sendData("Your Scenarios");
+					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_RESPONSE))
 					{
-						//messages.appendText("Player not found" + NEWLINE);
 						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
-						//clientStringResponse = # sentence
 						getClientByID(id).setResponse(clientStringResponse);
 						
 						int responsesReady = 0;
-						
 						for(ClientInfo client : clients)
 						{
 							if(client.hasResponded())

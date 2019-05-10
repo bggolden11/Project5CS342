@@ -193,6 +193,8 @@ public class FXNet extends Application {
 
 		TextField textPlayerSelect = new TextField();
 		Button btnSentenceSubmit = new Button("Select Sentence #");
+		Button btnGetSentences = new Button("Sentences Available");
+		
 		btnSentenceSubmit.setOnAction(event -> {
 			if(Game.isInteger(textPlayerSelect.getText()))
 			{
@@ -202,20 +204,32 @@ public class FXNet extends Application {
 				messages.appendText("Enter Sentence # and press Enter" + NEWLINE);
 		});
 		
-		HBox hbox = new HBox(20, textPlayerSelect, btnSentenceSubmit);
+		btnGetSentences.setOnAction(event -> {
+			sendCommand(GameCommands.CLIENT_GET_ANSWER_OPT);
+
+		});
+		
+		
+		HBox hbox = new HBox(20, textPlayerSelect, btnSentenceSubmit, btnGetSentences);
 
 		VBox vbox = new VBox(20, messages);
 
+		Button btnScenario = new Button("Current Scenario");
 		Button btnWho = new Button("Who Am I?");
 		Button btnLob = new Button("List of Players in Match");
 		Button btnExit = new Button("Exit Game");
 		
+		btnScenario.setOnAction(event -> {
+			sendCommand(GameCommands.CLIENT_GET_SCENARIO);
+
+		});
+		
 		btnWho.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.CLIENT_WHOAMI) + NEWLINE);
+			sendCommand(GameCommands.CLIENT_WHOAMI);
 		});
 		
 		btnLob.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.CLIENT_LOBBY) + NEWLINE);
+			sendCommand(GameCommands.CLIENT_LOBBY);
 		});
 
 		btnExit.setOnAction(event -> {
@@ -228,7 +242,7 @@ public class FXNet extends Application {
 
 		});
 		
-		HBox hboxTwo = new HBox(20, btnLob, btnWho, btnExit);
+		HBox hboxTwo = new HBox(20, btnScenario, btnLob, btnWho, btnExit);
 		
 		BorderPane border = new BorderPane();
 		border.setTop(hboxTwo);

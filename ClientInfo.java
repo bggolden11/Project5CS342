@@ -12,7 +12,7 @@ public class ClientInfo {
 	private int opponentID = 0;
 	private ClientThread thread;
 	private String response = null;
-	private static ArrayList<Card> deck;
+	private static ArrayList<String> deck;
 	
 	ClientInfo(ClientThread thread)
 	{
@@ -70,12 +70,12 @@ public class ClientInfo {
 		response = null;
 	}
 	
-	public void addDeck(Card card)
+	public void addCardToDeck(String card)
 	{
 		deck.add(card);
 	}
 	
-	public ArrayList<Card> getDeck()
+	public ArrayList<String> getDeck()
 	{
 		return deck;
 	}
