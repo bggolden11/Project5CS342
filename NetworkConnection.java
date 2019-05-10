@@ -98,40 +98,58 @@ public abstract class NetworkConnection {
 		if(isServer())
 		{
 			int responsesReady = 0;
-			String dataString = "";
+			String dataString = data.toString().trim();
 			
 			for(ClientInfo client : clients)
 			{
 				if(!client.hasResponded())
 				{
-					callback.accept("Player " + client.getID() + " still need to select a sentence.");
+					callback.accept("Player(s) still need to select a sentence.");
 				}
 				else
 				{
-					dataString += "Player " + client.getID() + ": " + client.getResponse() + NEWLINE;
+					if(Game.matchCommand(dataString, GameCommands.DECK_PLAYANSWERS))
+						callback.accept(client.getID() + ") " + client.getResponse());	
 					responsesReady++;
 				}
+					
 			}
 			
-			if(responsesReady > 0)
+			if(Game.matchCommand(dataString, GameCommands.CLIENT_AWARD) && responsesReady > 0)
 			{
 				if(responsesReady == clients.size()) //every client has submitted a response
-				{	
+				{
+			
+					callback.accept("tet");
+					int response = Integer.parseInt(dataString.replace(GameCommands.CLIENT_AWARD.toString(), ""));
+					
+					dataString = "Selected Winner: " + getClientByID(response).getResponse();
+					
+					getClientByID(response).addPoint();
 						
 					for(ClientInfo client : clients)
 					{
 						try {
-							client.sendData(dataString);
-							client.resetRound(); //clear opponents
+							if(client.getID() != response)
+								client.sendData("You lost\n");
+							else
+								client.sendData("You Won!\n");
+								
+							client.sendData(dataString + "\nYou have " + client.getPoints() + " points.\n");
 							client.clearResponse();
 								
-						} catch (IOException e) {}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
-					callback.accept("Enter # of best response (sentences in random order).\n" + dataString);
+				
+					callback.accept(dataString);
+					
+					clearScenario();
 				}
 			}
-			else
-				callback.accept("No responses available.");
+			else if(!Game.matchCommand(dataString, GameCommands.DECK_PLAYANSWERS))
+				callback.accept("Need more responses.");
 		}
 		else
 			connthread.out.writeObject(data);

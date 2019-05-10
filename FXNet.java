@@ -90,14 +90,16 @@ public class FXNet extends Application {
 		Button btnAnswers = new Button("View All Answers");
 		Button btnClear = new Button("Clear");
 		
-		Button btnSelectAnswer = new Button("Select Response #");
+		Button btnSelectAnswer = new Button("Enter Best Response #");
 		
 		TextField textAnswerSelect = new TextField();
 
 		btnAnnounce.setOnAction(event -> {
 			try {
-				conn.send("");//winner text
+				
+				conn.send(GameCommands.DECK_PLAYANSWERS);//winner text
 			} catch (Exception e) {
+				
 				System.out.println("Error sending command data.");
 			}
 		});
@@ -209,7 +211,6 @@ public class FXNet extends Application {
 		
 		btnGetSentences.setOnAction(event -> {
 			sendCommand(GameCommands.CLIENT_GET_ANSWER_OPT);
-
 		});
 		
 		

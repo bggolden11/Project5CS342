@@ -45,6 +45,7 @@ public class Game {
 		
 		DECK_SCENARIO,
 		DECK_ANSWERS,
+		DECK_PLAYANSWERS,
 		
 		MISC_MESSAGE,
 	};
