@@ -81,10 +81,6 @@ class Deck {
     Deck(){
         createDeck();
     }
-    //sets current card and when shuffled assigns it to index 0
-    void setCurrentCard(int currentCard) {
-        this.currentCard = currentCard;
-    }
 
     //shufffles the deck of cards to make sure cards dealt are random
     void Shuffle( ArrayList<Card> Deck) {
@@ -130,12 +126,13 @@ class CAH  {
     private Deck card = new Deck(); //creates and constructs the deck for the game
     private ArrayList<Player> Players  = new ArrayList<>();  //list of players
     ArrayList<Card> CenterCards = new ArrayList<>(); //list of cards in the center
-    private int numplayers = 0; //keeps track of num players
+    private int numplayers = 4; //keeps track of num players
     private int p1 = 0,p2 = 0,p3 = 0,p4 = 0;
 
 
     //adds cards to center that each person plays
     void  addToCenter(Card temp){
+        System.out.println(temp.getSentence());
         CenterCards.add(temp);
     }
     //plays the game if a player has trump card and the rest do not they get a point
@@ -179,9 +176,8 @@ class CAH  {
         return numplayers;
     }
     //sets the number of players from gui
-    void setNumplayers(int numplayers) {
-        this.numplayers = numplayers;
-        card.setCurrentCard(0);
+    void setNumplayers(int numberPlayers) {
+        this.numplayers = numberPlayers;
         //creates each player and assigns them a hand of cards
         for (int i = 0; i < numplayers; i++) {
             Player temp = new Player();
@@ -196,19 +192,12 @@ class CAH  {
 
 }
 
-
-//************************************************************************************
-
-interface Dealer{
-    ArrayList<Card> dealHand();
-}
-
 //************************************************************************************
 //player object
 class Player {
     //data members of the player object
     private ArrayList<Card> hand = new ArrayList<>();
-    private int bet = 0, score = 0;
+    private int score = 0;
 
     //gets the hand from the player
     ArrayList<Card> getHand() {
@@ -216,57 +205,19 @@ class Player {
     }
     //get the bet the player makes
 
-    int getScore() {
-        return score;
-    }
-    //sets player score
-    void setScore(int score) {
-        this.score = score;
-    }
-    //gives the player the hand of cards
     void setHand(ArrayList<Card> hand) {
         this.hand = hand;
     }
-
 }
-//************************************************************************************
-//creates AIPlayer
-class AIPlayer extends Player{
-    //AI data members
-    private ArrayList<Card> hand = new ArrayList<>();
-    private int bet = 0, score = 0;
-    //gets the hand
-    @Override
-    public ArrayList<Card> getHand() {
-        return hand;
-    }
-    //sets the AI players hand
-    @Override
-    public void setHand(ArrayList<Card> hand) {
-        this.hand = hand;
-    }
 
-}
 
 //************************************************************************************
 //GUI CLASS
 public class Gui extends Application {
     //basic data fields and types
-    private Button card1,card6,card5,card4,card3,card2,player2,player3,player4;
+    private Button card1,card6,card5,card4,card3,card2;
     private HashMap<String, Scene> sceneMap;
     private Stage myStage;
-    private int cardsUsed = 0;
-
-    //shows the Cards
-
-
-
-    // updates the scores near board
-    private static void scores(CAH game, Label score1, Label score2, Label score3) {
-        score1.setText("Player 1 " + (game.getPlayers().get(0).getScore()));
-        score2.setText("Player 2 " + (game.getPlayers().get(1).getScore()));
-        score3.setText("Player 3 " + (game.getPlayers().get(2).getScore()));
-    }
 
     //main that runs game
     public static void main(String[] args){
@@ -275,7 +226,7 @@ public class Gui extends Application {
 
     public void start(Stage primaryStage){
         //gui data members
-        sceneMap = new HashMap<String, Scene>();
+        sceneMap = new HashMap<>();
         myStage = primaryStage;
         CAH game = new CAH(); //creates the game
         game.setNumplayers(4); //assigns players to one so that gui will run
@@ -317,24 +268,15 @@ public class Gui extends Application {
             QuestionCard.setVisible(true);
         });
 
-//*****************************************************************************
-        //Gameplay scene
-        //bid buttons
-
-        //***************************************************************
-
-        //choose trump card
-        Button voteP1 = new Button("Clubs");
-        Button voteP2 = new Button("Spades");
-        Button voteP3 = new Button("Hearts");
-        Button voteP4 = new Button("Diamonds");
+//***************************************************************************
+        //voting buttons
+        Button voteP1 = new Button("");
+        Button voteP2 = new Button("");
+        Button voteP3 = new Button("");
+        Button voteP4 = new Button("");
         voteP4.setVisible(false); voteP3.setVisible(false); voteP2.setVisible(false); voteP1.setVisible(false);
         voteP4.setMaxWidth(Double.MAX_VALUE); voteP3.setMaxWidth(Double.MAX_VALUE);
         voteP2.setMaxWidth(Double.MAX_VALUE); voteP1.setMaxWidth(Double.MAX_VALUE);
-
-
-
-
 
 
         //Sets the cards to a different size
@@ -355,80 +297,80 @@ public class Gui extends Application {
         //action event that handles what occurs when a card is picked
         EventHandler<ActionEvent> returnButton = event -> {
             Button b = (Button) event.getSource();
-            //when card is clicked it adds player and ai player card to middle of deck and compares them to score points
+            //when card is clicked it adds player and ai player card to middle of deck
             game.CenterCards.clear();
 
                 if (b == card1) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(0));
+                        //System.out.println(game.getPlayers().get(i).getHand().get(0).getSentence());
                         game.getPlayers().get(i).getHand().set(0,game.getCard().dealCard());
                         card1.setText( game.getPlayers().get(i).getHand().get(0).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
+
                     }
                 }
                 if (b == card2) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(1));
                         game.getPlayers().get(i).getHand().set(1,game.getCard().dealCard());
                         card2.setText( game.getPlayers().get(i).getHand().get(1).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
 
                     }
                 }
                 if (b == card3) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(2));
                         game.getPlayers().get(i).getHand().set(2,game.getCard().dealCard());
                         card3.setText( game.getPlayers().get(i).getHand().get(2).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
 
                     }
                 }
                 if (b == card4) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(3));
                         game.getPlayers().get(i).getHand().set(3,game.getCard().dealCard());
                         card4.setText( game.getPlayers().get(i).getHand().get(3).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
-
                     }
                 }
                 if (b == card5) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(4));
                         game.getPlayers().get(i).getHand().set(4,game.getCard().dealCard());
                         card5.setText( game.getPlayers().get(i).getHand().get(4).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
 
                     }
                 }
                 if (b == card6) {
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < game.getNumplayers(); i++) {
                         game.addToCenter(game.getPlayers().get(i).getHand().get(5));
                         game.getPlayers().get(i).getHand().set(5,game.getCard().dealCard());
                         card6.setText( game.getPlayers().get(i).getHand().get(5).getSentence());
-                        voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
-
                     }
                 }
-            voteP4.setMaxWidth(Double.MAX_VALUE); voteP3.setMaxWidth(Double.MAX_VALUE);
-            voteP2.setMaxWidth(Double.MAX_VALUE); voteP1.setMaxWidth(Double.MAX_VALUE);
+
+            game.printCenter();
+
+            voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
+
+            voteP1.setMaxWidth(Double.MAX_VALUE);
+            voteP2.setMaxWidth(Double.MAX_VALUE);
+            voteP3.setMaxWidth(Double.MAX_VALUE);
+            voteP4.setMaxWidth(Double.MAX_VALUE);
 
             voteP1.setText( game.getCenter().get(0).getSentence());
             voteP2.setText( game.getCenter().get(1).getSentence());
             voteP3.setText( game.getCenter().get(2).getSentence());
             voteP4.setText( game.getCenter().get(3).getSentence());
+            game.getCenter().clear();
 
 
 
             card1.setVisible(false);card2.setVisible(false);card3.setVisible(false);
             card4.setVisible(false);card5.setVisible(false);card6.setVisible(false);
-            game.CenterCards.clear();
 
 
                 //b.setDisable(true); //disables buttons
                 //b.setVisible(false); //makes button invisible
-                game.play(); //allows players to score based on cards in center
 
         };
 
