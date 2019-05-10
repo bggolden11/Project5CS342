@@ -34,10 +34,10 @@ class Card {
 class Deck {
 
     //data members of Deck
-    private int currentCard = 0; //keeps track of what card to deal
-    private int totalNumCards = 0;
-    private int totalNumQuestions = 0;
-    private int currentQuestion = 0;
+    private int currentCard = 0; //keeps track of what card to deal for answers
+    private int totalNumCards = 0;  //keeps track of total number of cards for answers
+    private int totalNumQuestions = 0; //total number of questions
+    private int currentQuestion = 0;  //keeps track of what question card is being used
     private ArrayList<Card> Deck = new ArrayList<>(); //contains all the cards for deck
     private ArrayList<Card> Scenarios = new ArrayList<>(); //contains scenarios for cards against humanity
 
@@ -46,7 +46,7 @@ class Deck {
     private void createDeck() {
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/answers.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("src/answers.txt")); //reads answer cards from file
             String line = reader.readLine();
             while (line != null) {
                 totalNumCards++;
@@ -60,7 +60,7 @@ class Deck {
         }
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("src/questions.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("src/questions.txt")); //reads question cards from file
             String line = reader.readLine();
             while (line != null) {
                 totalNumQuestions++;
