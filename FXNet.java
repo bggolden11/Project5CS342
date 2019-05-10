@@ -147,45 +147,8 @@ public class FXNet extends Application {
 
 		primaryStage.setTitle(ip + " " + (isServer ? "Server GUI " : "Client GUI ") + port);
 
-		Button btnRock = new Button("Rock");
-		Button btnPaper = new Button("Paper");
-		Button btnScissors = new Button("Scissors");
-		Button btnLizard = new Button("Lizard");
-		Button btnSpock = new Button("Spock");
-
-		btnRock.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_ROCK) + NEWLINE);
-		});
-
-		btnPaper.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_PAPER) + NEWLINE);
-		});
-
-		btnScissors.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_SCISSORS) + NEWLINE);
-		});
-
-		btnLizard.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_LIZARD) + NEWLINE);
-		});
-
-		btnSpock.setOnAction(event -> {
-			messages.appendText(sendCommand(GameCommands.PLAY_SPOCK) + NEWLINE);
-		});
-		
-
-		HBox hbox = new HBox(20, btnRock, btnPaper, btnScissors, btnLizard, btnSpock);
-		//hbox.setPrefSize(600, 600);
-		
-
-		VBox vbox = new VBox(20, messages);
-
 		TextField textPlayerSelect = new TextField();
 		Button btnSentenceSubmit = new Button("Select Sentence #");
-		Button btnWho = new Button("Who Am I?");
-		Button btnLob = new Button("Who can I Play?");
-		Button btnExit = new Button("Exit Game");
-		
 		btnSentenceSubmit.setOnAction(event -> {
 			if(Game.isInteger(textPlayerSelect.getText()))
 			{
@@ -194,6 +157,18 @@ public class FXNet extends Application {
 			else
 				messages.appendText("Enter Sentence # and press Enter" + NEWLINE);
 		});
+		
+		HBox hbox = new HBox(20, textPlayerSelect, btnSentenceSubmit);
+		//hbox.setPrefSize(600, 600);
+		
+
+		VBox vbox = new VBox(20, messages);
+
+		Button btnWho = new Button("Who Am I?");
+		Button btnLob = new Button("List of Players in Match");
+		Button btnExit = new Button("Exit Game");
+		
+		
 		
 		btnWho.setOnAction(event -> {
 			messages.appendText(sendCommand(GameCommands.CLIENT_WHOAMI) + NEWLINE);
@@ -214,7 +189,7 @@ public class FXNet extends Application {
 
 		});
 		
-		HBox hboxTwo = new HBox(20, textPlayerSelect, btnSentenceSubmit, btnLob, btnWho, btnExit);
+		HBox hboxTwo = new HBox(20, btnLob, btnWho, btnExit);
 		
 		BorderPane border = new BorderPane();
 		border.setTop(hboxTwo);

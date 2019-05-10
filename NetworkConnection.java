@@ -81,7 +81,6 @@ public abstract class NetworkConnection {
 				if(!client.hasResponded())
 				{
 					callback.accept("Player " + client.getID() + " still need to select a sentence.");
-					
 				}
 				else
 				{
@@ -198,8 +197,6 @@ public abstract class NetworkConnection {
 							
 							if(responsesReady == clients.size()) //every client has submitted a response
 								client.sendData("All responses received, awaiting selection of winner.");
-						
-							
 						}
 					}
 					else //no commands detected
