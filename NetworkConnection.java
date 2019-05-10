@@ -154,7 +154,7 @@ public abstract class NetworkConnection {
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_LOBBY))
 					{
-						String lobby = "Lobby: ";
+						String lobby = "List of Players: ";
 						for(ClientInfo client : clients)
 						{
 							int c = client.getID();
@@ -168,9 +168,33 @@ public abstract class NetworkConnection {
 					{
 						//messages.appendText("Player not found" + NEWLINE);
 						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
+						//clientStringResponse = # sentence
 						getClientByID(id).setResponse(clientStringResponse);
 						getClientByID(id).sendData("Sentence recieved, wait for results.");
 						
+						boolean responsesReady = true;
+						
+						for(ClientInfo client : clients)
+						{
+							int c = client.getID();
+							
+							if(!getClientByID(id).hasResponded())
+								responsesReady = false;
+							
+							if(id != c)
+								client.sendData("Player " + id + " has chosen a card.");
+						}
+						
+						if(responsesReady)
+						{
+							//if nobody triggered false, let the server know
+							callback.accept("Ready to view player selections.");
+							
+							for(ClientInfo client : clients)
+							{
+								client.sendData("All responses received, awaiting selection of winner.");
+							}
+						}
 					}
 					else //no commands detected
 					{
@@ -203,14 +227,23 @@ public abstract class NetworkConnection {
 				
 			}
 			catch(Exception e) {
-				for(ClientInfo client : clients)
+				try
 				{
-					if(client.getID() == id)
+					for(ClientInfo client : clients)
 					{
-						clients.remove(client);
-						callback.accept("Player " + id + " Disconnected.");
-						break;
+						if(client.getID() == id)
+						{
+							clients.remove(client);
+							callback.accept("Player " + id + " has left the game.");
+							break;
+						}
+						else
+							client.sendData("Player " + id + " has left the game.");
 					}
+				}
+				catch (Exception e2) //server probably on fire, if this happens blame brian
+				{
+					e2.printStackTrace();
 				}
 				
 			}
