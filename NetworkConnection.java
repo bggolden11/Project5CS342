@@ -21,8 +21,6 @@ public abstract class NetworkConnection {
 
 	ArrayList<ClientInfo> clients;
 	
-	private int playerOne = 0;
-	private int playerTwo = 0;
 	private int playerCount = 0;
 	
 	private final int MAX_PLAYERS = 8;
@@ -197,33 +195,6 @@ public abstract class NetworkConnection {
 							
 							if(responsesReady == clients.size()) //every client has submitted a response
 								client.sendData("All responses received, awaiting selection of winner.");
-						}
-					}
-					else //no commands detected
-					{
-						if(getClientByID(id).isBusy())
-						{
-							getClientByID(id).setResponse(data.toString());
-							
-							if(playerOne != id)
-							{
-								getClientByID(playerOne).sendData("Your opponent has chosen an action.");
-							}
-							else if(playerTwo != id)
-							{
-								getClientByID(playerTwo).sendData("Your opponent has chosen an action.");
-							}
-							
-							callback.accept("Player " + id + ": " + data);
-							
-							if(getClientByID(playerOne).hasResponded() && getClientByID(playerTwo).hasResponded())
-							{
-								callback.accept("Ready to view responses");
-							}
-						}
-						else
-						{
-							getClientByID(id).sendData("You must challenge a player first.");
 						}
 					}
 				}

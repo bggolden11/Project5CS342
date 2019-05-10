@@ -75,16 +75,18 @@ public class FXNet extends Application {
 	private Parent initServerGameUI(Stage primaryStage) {
 		messages.setPrefHeight(550);
 
-		primaryStage.setTitle(ip + " " + (isServer ? "Game Server " : "Client Player") + port);
+		primaryStage.setTitle(ip + " " + "Game Server " + port);
 
 		TextField textPortNum = new TextField();
 		textPortNum.setText("5555");
 		Button btnAnnounce = new Button("View Responses");
 		Button btnExit = new Button("Exit Game");
+		
+		TextField textPlayerSelect = new TextField();
 
 		btnAnnounce.setOnAction(event -> {
 			try {
-				conn.send("");
+				conn.send(textPlayerSelect.getText());
 			} catch (Exception e) {
 				System.out.println("Error sending command data.");
 			}
@@ -93,9 +95,7 @@ public class FXNet extends Application {
 		btnExit.setOnAction(event -> {
 			try {
 				conn.closeConn();
-			} catch (Exception e) {
-			}
-
+			} catch (Exception e) {}
 			System.exit(0);
 
 		});
@@ -145,7 +145,7 @@ public class FXNet extends Application {
 	private Parent initClientGameUI(Stage primaryStage) {
 		//messages.setPrefHeight(550);
 
-		primaryStage.setTitle(ip + " " + (isServer ? "Server GUI " : "Client GUI ") + port);
+		primaryStage.setTitle(ip + ":" + port + " You are Player" + conn.getClientID());
 
 		TextField textPlayerSelect = new TextField();
 		Button btnSentenceSubmit = new Button("Select Sentence #");
@@ -167,8 +167,6 @@ public class FXNet extends Application {
 		Button btnWho = new Button("Who Am I?");
 		Button btnLob = new Button("List of Players in Match");
 		Button btnExit = new Button("Exit Game");
-		
-		
 		
 		btnWho.setOnAction(event -> {
 			messages.appendText(sendCommand(GameCommands.CLIENT_WHOAMI) + NEWLINE);
