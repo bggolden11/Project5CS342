@@ -30,6 +30,7 @@ public class FXNet extends Application {
 	private final String DBLNEWLINE = "\n\n";
 	
 	private Stage stage;
+	private Game gameEngine;
 
 	/* Server GUI */
 	
@@ -67,7 +68,6 @@ public class FXNet extends Application {
 			} catch (Exception e) {}
 
 			System.exit(0);
-
 		});
 
 		return root;

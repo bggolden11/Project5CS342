@@ -282,7 +282,6 @@ public abstract class NetworkConnection {
 						
 						if(Game.matchCommand(dataString, GameCommands.CLIENT_ASSIGN))
 						{
-							//messages.appendText("Player not found" + NEWLINE);
 							dataString = (data.toString().replace(GameCommands.CLIENT_ASSIGN.toString(), ""));
 							if (Game.isInteger(dataString))
 								setLocalID(Integer.parseInt(dataString));
