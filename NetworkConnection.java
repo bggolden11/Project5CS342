@@ -85,7 +85,7 @@ public abstract class NetworkConnection {
 				}
 				else
 				{
-					dataString += client.getID() + ": " + client.getResponse() + NEWLINE;
+					dataString += "Player " + client.getID() + ": " + client.getResponse() + NEWLINE;
 					responsesReady++;
 				}
 			}
@@ -102,7 +102,7 @@ public abstract class NetworkConnection {
 							
 					} catch (IOException e) {}
 				}
-				callback.accept("Vote by response # \n" + dataString);
+				callback.accept("Enter # of best response (sentences in random order).\n" + dataString);
 			}
 		}
 		else
@@ -170,30 +170,31 @@ public abstract class NetworkConnection {
 						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
 						//clientStringResponse = # sentence
 						getClientByID(id).setResponse(clientStringResponse);
-						getClientByID(id).sendData("Sentence recieved, wait for results.");
 						
-						boolean responsesReady = true;
+						int responsesReady = 0;
+						
+						for(ClientInfo client : clients)
+						{
+							if(client.hasResponded())
+								responsesReady++;
+						}
+						
+						if(responsesReady == clients.size()) //every client has submitted a response
+							callback.accept("Ready to view player selections.");
 						
 						for(ClientInfo client : clients)
 						{
 							int c = client.getID();
 							
-							if(!getClientByID(id).hasResponded())
-								responsesReady = false;
-							
 							if(id != c)
 								client.sendData("Player " + id + " has chosen a card.");
-						}
-						
-						if(responsesReady)
-						{
-							//if nobody triggered false, let the server know
-							callback.accept("Ready to view player selections.");
+							else
+								client.sendData("Sentence recieved.");
 							
-							for(ClientInfo client : clients)
-							{
+							if(responsesReady == clients.size()) //every client has submitted a response
 								client.sendData("All responses received, awaiting selection of winner.");
-							}
+						
+							
 						}
 					}
 					else //no commands detected
