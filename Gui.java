@@ -3,6 +3,7 @@
         import java.io.BufferedReader;
         import java.io.FileReader;
         import java.io.IOException;
+        import java.io.Serializable;
         import java.util.ArrayList;
         import java.util.Collections;
         import java.util.HashMap;
@@ -272,6 +273,19 @@ class Player {
 //************************************************************************************
 //GUI CLASS
 public class Gui extends Application {
+    private Client createClient(String ip, int port) {
+        return new Client("127.0.0.1", 5555, data -> {
+            Platform.runLater(() -> {
+                messages.appendText(data.toString() + "\n");
+            });
+        });
+    }
+
+
+
+
+
+
     private TextArea messages = new TextArea();
     Client conn1;
     //basic data fields and types
@@ -325,6 +339,12 @@ public class Gui extends Application {
 */
         Conenct.setOnAction(event -> {
             conn1=createClient("127.0.0.1",5555);
+            try{
+                conn1.startConn();
+
+            }
+            catch(Exception e1)
+            {}
             myStage.setScene(sceneMap.get("gamePlay"));
             QuestionCard.setVisible(true);
 
@@ -373,7 +393,14 @@ public class Gui extends Application {
                     //System.out.println(game.getPlayers().get(i).getHand().get(0).getSentence());
                     game.getPlayers().get(i).getHand().set(0, game.getCard().dealCard());
                     card1.setText(game.getPlayers().get(i).getHand().get(0).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(0).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
 
+                  //  conn1.send( card1.setText(game.getPlayers().get(i).getHand().get(0).getSentence()));
+                    //ser
                 }
             }
             if (b == card2) {
@@ -381,6 +408,11 @@ public class Gui extends Application {
                     game.addToCenter(game.getPlayers().get(i).getHand().get(1));
                     game.getPlayers().get(i).getHand().set(1, game.getCard().dealCard());
                     card2.setText(game.getPlayers().get(i).getHand().get(1).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(1).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
 
                 }
             }
@@ -389,6 +421,11 @@ public class Gui extends Application {
                     game.addToCenter(game.getPlayers().get(i).getHand().get(2));
                     game.getPlayers().get(i).getHand().set(2, game.getCard().dealCard());
                     card3.setText(game.getPlayers().get(i).getHand().get(2).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(1).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
 
                 }
             }
@@ -397,6 +434,11 @@ public class Gui extends Application {
                     game.addToCenter(game.getPlayers().get(i).getHand().get(3));
                     game.getPlayers().get(i).getHand().set(3, game.getCard().dealCard());
                     card4.setText(game.getPlayers().get(i).getHand().get(3).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(1).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
                 }
             }
             if (b == card5) {
@@ -404,6 +446,11 @@ public class Gui extends Application {
                     game.addToCenter(game.getPlayers().get(i).getHand().get(4));
                     game.getPlayers().get(i).getHand().set(4, game.getCard().dealCard());
                     card5.setText(game.getPlayers().get(i).getHand().get(4).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(1).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
 
                 }
             }
@@ -412,6 +459,11 @@ public class Gui extends Application {
                     game.addToCenter(game.getPlayers().get(i).getHand().get(5));
                     game.getPlayers().get(i).getHand().set(5, game.getCard().dealCard());
                     card6.setText(game.getPlayers().get(i).getHand().get(5).getSentence());
+                    String temp = game.getPlayers().get(i).getHand().get(1).getSentence();
+                    try {
+                        conn1.send((Serializable) (temp));
+                    }
+                    catch(Exception e1){}
                 }
             }
 
@@ -521,12 +573,8 @@ public class Gui extends Application {
         voteP4.setVisible(false);
     }
 
-    private Client createClient(String ip, int port) {
-        return new Client("127.0.0.1", 5555, data -> {
-            Platform.runLater(() -> {
-                messages.appendText(data.toString() + "\n");
-            });
-        });
-    }
+
 }
+
+
 
