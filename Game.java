@@ -9,16 +9,16 @@ public class Game {
 	private static final String NEWLINE = "\n";
 	private static final String DBLNEWLINE = "\n\n";
 	
-	private static final String GAME_SCENARIO_DICTIONARY = "src/serverScenarios.txt";
-	private static final String GAME_ANSWERS_DICTIONARY = "src/serverAnswers.txt";
+	private static final String GAME_SCENARIO_DICTIONARY = "projectFive/serverScenarios.txt";
+	private static final String GAME_ANSWERS_DICTIONARY = "projectFive/serverAnswers.txt";
 	
     private static ArrayList<Card> scenarios; //contains scenarios for cards against humanity
     private static ArrayList<Card> answers; //contains all the cards for deck
     
     public Game()
     {
-    	initScenarios(GAME_SCENARIO_DICTIONARY);
-    	initAnswers(GAME_ANSWERS_DICTIONARY);
+    	scenarios = initDeck(GAME_SCENARIO_DICTIONARY);
+    	answers = initDeck(GAME_ANSWERS_DICTIONARY);
     }
 	
 	/*resource: https://www.baeldung.com/java-check-string-number*/
@@ -39,6 +39,9 @@ public class Game {
 		CLIENT_LOBBY,
 		CLIENT_ASSIGN,
 		
+		DECK_SCENARIO,
+		DECK_ANSWERS,
+		
 		MISC_MESSAGE,
 	};
 	
@@ -56,38 +59,43 @@ public class Game {
 	    }
 	}
 	
-	private void initScenarios(String filePath)
+	public void printDeck(GameCommands deck)
 	{
-		scenarios = new ArrayList<Card>();
-		try {
-            BufferedReader reader = new BufferedReader(new FileReader(filePath)); //reads answer cards from file
-            String line = reader.readLine();
-            
-            while (line != null) {
-            	
-            	scenarios.add(new Card(line));
-                // read next line
-                line = reader.readLine();
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-		
-		Collections.shuffle(scenarios); //randomize order
+		if(Game.matchCommand(deck, GameCommands.DECK_SCENARIO))
+		{
+			printDeck(scenarios);
+		}
+		else if(Game.matchCommand(deck, GameCommands.DECK_ANSWERS))
+		{
+			printDeck(answers);
+		}
 	}
 	
-	private void initAnswers(String filePath)
+	public void printDeck(ArrayList<Card> deck)
 	{
-		answers = new ArrayList<Card>();
+		if(deck != null)
+		{
+		    for (int i = 0; i < deck.size(); i++) {
+		    	System.out.println(deck.get(i).getSentence());
+		    }
+		}
+		else
+			System.out.println("Loading ...");
+	}
+	
+	private ArrayList<Card> initDeck(String filePath)
+	{
+		ArrayList<Card> deck = new ArrayList<Card>();
+		ClassLoader classLoader = getClass().getClassLoader();
+		
 		try {
-            BufferedReader reader = new BufferedReader(new FileReader(filePath)); //reads answer cards from file
+			File file = new File(classLoader.getResource(filePath).getFile());
+            BufferedReader reader = new BufferedReader(new FileReader(file)); //reads answer cards from file
             String line = reader.readLine();
             
             while (line != null) {
             	
-            	answers.add(new Card(line));
-                // read next line
+            	deck.add(new Card(line));
                 line = reader.readLine();
             }
             reader.close();
@@ -95,7 +103,9 @@ public class Game {
             e.printStackTrace();
         }
 		
-		Collections.shuffle(answers); //randomize order
+		Collections.shuffle(deck); //randomize order
+		
+		return deck;
 	}
 	
 	public static GameCommands stringToCommand(String command) {
@@ -112,6 +122,11 @@ public class Game {
 	public static boolean matchCommand(String input, GameCommands command)
 	{
 		return input.startsWith(command.toString());
+	}
+	
+	public static boolean matchCommand(GameCommands command, GameCommands commandTwo)
+	{
+		return command.toString().startsWith(commandTwo.toString());
 	}
 	
 	static void print(Object obj)

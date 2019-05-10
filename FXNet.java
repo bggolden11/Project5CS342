@@ -69,6 +69,12 @@ public class FXNet extends Application {
 
 			System.exit(0);
 		});
+		
+		//init decks
+		gameEngine = new Game();
+		
+		gameEngine.printDeck(GameCommands.DECK_SCENARIO);
+		//gameEngine.printAnswers();
 
 		return root;
 	}
