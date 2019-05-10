@@ -217,7 +217,7 @@ public abstract class NetworkConnection {
 							int responseID = Integer.parseInt(clientStringResponse);
 							responseID--;
 							
-							if(responseID < 0 || responseID < getClientByID(id).getDeck().size())
+							if(responseID <= 0 || responseID < getClientByID(id).getDeck().size())
 							{
 								getClientByID(id).setResponse(responseID);
 							

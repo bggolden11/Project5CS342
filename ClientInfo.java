@@ -12,6 +12,7 @@ public class ClientInfo {
 	private int opponentID = 0;
 	private ClientThread thread;
 	private String response = null;
+	private int currentCardID = -1;
 	private ArrayList<String> deck;
 	
 	ClientInfo(ClientThread thread)
@@ -68,6 +69,9 @@ public class ClientInfo {
 	
 	public void clearResponse()
 	{
+		if(currentCardID != -1)
+			getDeck().remove(currentCardID);
+		
 		response = null;
 	}
 	
@@ -93,7 +97,7 @@ public class ClientInfo {
 	
 	public void setResponse(int deckID)
 	{
-		getDeck().remove(deckID);
+		currentCardID = deckID;
 		this.response = getDeck().get(deckID);
 		
 	}
