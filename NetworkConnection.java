@@ -21,13 +21,20 @@ public abstract class NetworkConnection {
 
 	ArrayList<ClientInfo> clients;
 	
-	private int playerOne = 0;
-	private int playerTwo = 0;
 	private int playerCount = 0;
+	int localID = 0;
+	
+	private String currentScenario = null;
 	
 	private final int MAX_PLAYERS = 8;
 	
-	public NetworkConnection(Consumer<Serializable> callback) {
+	private final String NEWLINE = "\n";
+	private final String DBLNEWLINE = "\n\n";
+
+	private FXNet ui;
+	
+	public NetworkConnection(FXNet ui, Consumer<Serializable> callback) {
+		this.ui = ui;
 		this.callback = callback;
 		connthread = new ConnThread();
 		connthread.setDaemon(true);
@@ -45,10 +52,30 @@ public abstract class NetworkConnection {
 		return clients.size();
 	}
 	
-	public int getClientID()
+	public void setLocalID(int id)
 	{
-		
-		return 0; //server
+		localID = id;
+		ui.assignClient();
+	}
+	
+	public void setScenario(String str)
+	{
+		currentScenario = str;
+	}
+	
+	public String getScenario()
+	{
+		return currentScenario;
+	}
+	
+	public void clearScenario()
+	{
+		currentScenario = null;
+	}
+	
+	public int getLocalID()
+	{		
+		return localID; //server
 	}
 	
 	public ClientInfo getClientByID(int id)
@@ -71,54 +98,55 @@ public abstract class NetworkConnection {
 		if(isServer())
 		{
 			int responsesReady = 0;
-
+			String dataString = data.toString().trim();
+			
 			for(ClientInfo client : clients)
 			{
 				if(!client.hasResponded())
 				{
-					callback.accept("Player " + client.getID() + " still need to select a sentence.");
-					
+					callback.accept("Player(s) still need to select a sentence.");
 				}
 				else
+				{
+					if(Game.matchCommand(dataString, GameCommands.DECK_PLAYANSWERS))
+						callback.accept(client.getID() + ") " + client.getResponse());	
 					responsesReady++;
+				}
+					
 			}
 			
-			if(responsesReady == clients.size())
+			if(Game.matchCommand(dataString, GameCommands.CLIENT_AWARD) && responsesReady > 0)
 			{
-				callback.accept("ready");
-			}
-			else
-			{
-				callback.accept("not ready");
-			}
-			
-			if(true)
-			{
-				/*
-				
-				final String dataString = "\nPlayer " + clientOne.getID() + " (" + clientOne.getPoints() + " points) played " + clientOne.getResponse() + "\n" + 
-						"Player " + clientTwo.getID() + " (" + clientTwo.getPoints() + " points) played " + clientTwo.getResponse() + "\n"
-							+ (winnerID > 0 ? 
-								("Player " + winnerID + " has won the round.") : 
-								("This round is a tie.")) + "\n";
+				if(responsesReady == clients.size()) //every client has submitted a response
+				{
+					int response = Integer.parseInt(dataString.replace(GameCommands.CLIENT_AWARD.toString(), ""));
+					
+					dataString = "Selected Winner: " + getClientByID(response).getResponse();
+					
+					getClientByID(response).addPoint();
+						
+					for(ClientInfo client : clients)
+					{
+						try {
+							if(client.getID() != response)
+								client.sendData("You lost");
+							else
+								client.sendData("You Won!");
 								
-
-				callback.accept(dataString);
+							client.sendData(dataString + "\nYou have " + client.getPoints() + " points.\n");
+							client.clearResponse();
+								
+						} catch (IOException e) {
+						}
+					}
 				
-				clients.forEach((client) -> {
-					try {
-						client.sendData(dataString);
-						client.resetRound(); //clear opponents
-						client.clearResponse();
-					} catch (IOException e) {}
-				});
-				
-				playerOne = 0;
-				playerTwo = 0;
-				*/
-			
+					callback.accept(dataString);
+					
+					clearScenario();
+				}
 			}
-				
+			else if(!Game.matchCommand(dataString, GameCommands.DECK_PLAYANSWERS))
+				callback.accept("Need more responses.");
 		}
 		else
 			connthread.out.writeObject(data);
@@ -165,11 +193,12 @@ public abstract class NetworkConnection {
 					
 					if(Game.matchCommand(dataString, GameCommands.CLIENT_WHOAMI))
 					{
+						getClientByID(id).sendData(GameCommands.CLIENT_ASSIGN.toString() + id);
 						getClientByID(id).sendData("You are Player " + id);
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_LOBBY))
 					{
-						String lobby = "Lobby: ";
+						String lobby = "List of Players: ";
 						for(ClientInfo client : clients)
 						{
 							int c = client.getID();
@@ -179,94 +208,82 @@ public abstract class NetworkConnection {
 						}
 						getClientByID(id).sendData(lobby);
 					}
-					else if(Game.matchCommand(dataString, GameCommands.CLIENT_CHALLENGE))
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_ANSWER_OPT))
+					{	
+						getClientByID(id).sendData(getClientByID(id).readDeck());
+					}
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_SCENARIO))
 					{
-						int clientID;
-						//messages.appendText("Player not found" + NEWLINE);
-						String clientStringID = dataString.replace(GameCommands.CLIENT_CHALLENGE.toString(), "");
-						if(!Game.isInteger(clientStringID))
+						if(currentScenario == null)
+							getClientByID(id).sendData("Server has not selected a scenario");
+						else
+							getClientByID(id).sendData(currentScenario);
+					}
+					else if(Game.matchCommand(dataString, GameCommands.CLIENT_RESPONSE))
+					{
+						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
+						
+						if(!Game.isInteger(clientStringResponse))
 						{
-							getClientByID(id).sendData("Invalid Challenge.");
+							getClientByID(id).sendData("Invalid answer.");
 						}
 						else
 						{
-							clientID = Integer.parseInt(clientStringID);
-							boolean foundClient = false;
-							if(clientID == id)
-								getClientByID(id).sendData("You cannot play yourself.");
-							else if((playerOne + playerTwo) > 0)
-								getClientByID(id).sendData("Match currently in progress.");
-							else
+							int responseID = Integer.parseInt(clientStringResponse);
+							responseID--;
+							
+							if(responseID <= 0 || responseID < getClientByID(id).getDeck().size())
 							{
+								getClientByID(id).setResponse(responseID);
+							
+								int responsesReady = 0;
 								for(ClientInfo client : clients)
 								{
-									if(clientID == client.getID())
-									{
-										foundClient = true;
-										if(getClientByID(clientID).isBusy())
-										{
-											getClientByID(clientID).sendData("Player " + id + " wanted to challenge you. You are already in a match.");
-											getClientByID(id).sendData("Player " + clientID + " is already in a match.");
-										}
-										else
-										{
-											getClientByID(id).startRound(clientID);
-											getClientByID(clientID).startRound(id);
-											
-											playerOne = clientID;
-											playerTwo = id;
-											
-											getClientByID(id).sendData("Challenged Player " + clientID + ", press any action to play.");
-											getClientByID(clientID).sendData("Player " + id + " has challenged you, press any action to play.");
-										}
-									}
+									if(client.hasResponded())
+										responsesReady++;
 								}
 								
-								if(!foundClient)
-									getClientByID(id).sendData("Player " + clientStringID + " not found.");
+								if(responsesReady == clients.size()) //every client has submitted a response
+									callback.accept("Ready to view player selections.");
+								
+								for(ClientInfo client : clients)
+								{
+									int c = client.getID();
+									
+									if(id != c)
+										client.sendData("Player " + id + " has chosen a card.");
+									else
+										client.sendData("Sentence recieved.");
+									
+									if(responsesReady == clients.size()) //every client has submitted a response
+										client.sendData("All responses received, awaiting selection of winner.");
+								}
 							}
-						}
-						
-					}
-					else //no commands detected
-					{
-						if(getClientByID(id).isBusy())
-						{
-							getClientByID(id).setResponse(data.toString());
-							
-							if(playerOne != id)
-							{
-								getClientByID(playerOne).sendData("Your opponent has chosen an action.");
-							}
-							else if(playerTwo != id)
-							{
-								getClientByID(playerTwo).sendData("Your opponent has chosen an action.");
-							}
-							
-							callback.accept("Player " + id + ": " + data);
-							
-							if(getClientByID(playerOne).hasResponded() && getClientByID(playerTwo).hasResponded())
-							{
-								callback.accept("Ready to announce winner");
-							}
-						}
-						else
-						{
-							getClientByID(id).sendData("You must challenge a player first.");
+							else
+								getClientByID(id).sendData("Invalid answer.");
 						}
 					}
 				}
 				
 			}
 			catch(Exception e) {
-				for(ClientInfo client : clients)
+				try
 				{
-					if(client.getID() == id)
+					for(ClientInfo client : clients)
 					{
-						clients.remove(client);
-						callback.accept("Player " + id + " Disconnected.");
-						break;
+						if(client.getID() == id)
+						{
+							clients.remove(client);
+							callback.accept("Player " + id + " has left the game.");
+							break;
+						}
+						else
+							client.sendData("Player " + id + " has left the game.");
 					}
+				}
+				catch (Exception e2) //server probably on fire, if this happens blame brian
+				{
+					e2.printStackTrace();
 				}
 				
 			}
@@ -277,15 +294,21 @@ public abstract class NetworkConnection {
 		
 		Socket socket;
 		private ObjectOutputStream out;
+		Game gameEngine;
 		
 		public void run() {
 			
 			if(isServer())
 			{
 				try(ServerSocket server = new ServerSocket(getPort())) {
+					gameEngine = new Game();
 					while(getNumClients() < MAX_PLAYERS)
 					{
 						ClientInfo client = new ClientInfo(new ClientThread(server.accept(), ++playerCount));
+						
+						for(int i = 0; i < 5; i++)
+							client.addCardToDeck(gameEngine.drawDeckRandom(GameCommands.DECK_ANSWERS));
+						
 						clients.add(client);
 						
 						client.startThread();	
@@ -317,7 +340,16 @@ public abstract class NetworkConnection {
 					
 					while(true) {
 						Serializable data = (Serializable) in.readObject();
-						callback.accept(data);
+						String dataString = data.toString();
+						
+						if(Game.matchCommand(dataString, GameCommands.CLIENT_ASSIGN))
+						{
+							dataString = (data.toString().replace(GameCommands.CLIENT_ASSIGN.toString(), ""));
+							if (Game.isInteger(dataString))
+								setLocalID(Integer.parseInt(dataString));
+						}
+						else
+							callback.accept(data);
 					}
 					
 				}

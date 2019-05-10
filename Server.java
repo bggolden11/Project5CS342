@@ -8,7 +8,7 @@ public class Server extends NetworkConnection {
 	private int port;
 	
 	public Server(int port, Consumer<Serializable> callback) {
-		super(callback);
+		super(null, callback);
 		// TODO Auto-generated constructor stub
 		this.port = port;
 	}

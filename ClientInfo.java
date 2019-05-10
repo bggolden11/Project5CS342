@@ -1,7 +1,9 @@
 package projectFive;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import projectFive.Game.Card;
 import projectFive.NetworkConnection.ClientThread;
 
 public class ClientInfo {
@@ -10,11 +12,14 @@ public class ClientInfo {
 	private int opponentID = 0;
 	private ClientThread thread;
 	private String response = null;
+	private int currentCardID = -1;
+	private ArrayList<String> deck;
 	
 	ClientInfo(ClientThread thread)
 	{
 		this.thread = thread;
 		id = this.thread.getID();
+		deck = new ArrayList<String>();
 	}
 	
 	public void startThread()
@@ -64,12 +69,37 @@ public class ClientInfo {
 	
 	public void clearResponse()
 	{
+		if(currentCardID != -1)
+			getDeck().remove(currentCardID);
+		
 		response = null;
 	}
 	
-	public void setResponse(String response)
+	public void addCardToDeck(String card)
 	{
-		this.response = response;
+		deck.add(card);
+	}
+	
+	public String readDeck()
+	{
+		String str = "";
+		for(int i = 0; i < deck.size(); i++)
+		{
+			str += (i + 1) + ") " + deck.get(i) + "\n";
+		}
+		return str;
+	}
+	
+	public ArrayList<String> getDeck()
+	{
+		return deck;
+	}
+	
+	public void setResponse(int deckID)
+	{
+		currentCardID = deckID;
+		this.response = getDeck().get(deckID);
+		
 	}
 	
 	public void sendData(Object data) throws IOException

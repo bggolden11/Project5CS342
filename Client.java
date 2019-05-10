@@ -8,8 +8,8 @@ public class Client extends NetworkConnection {
 	private String ip;
 	private int port; 
 	
-	public Client(String ip, int port, Consumer<Serializable> callback) {
-		super(callback);
+	public Client(String ip, int port, FXNet ui, Consumer<Serializable> callback) {
+		super(ui, callback);
 		this.ip = ip;
 		this.port = port;
 	}
