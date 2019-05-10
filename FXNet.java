@@ -221,7 +221,6 @@ public class FXNet extends Application {
 		
 		btnScenario.setOnAction(event -> {
 			sendCommand(GameCommands.CLIENT_GET_SCENARIO);
-
 		});
 		
 		btnWho.setOnAction(event -> {

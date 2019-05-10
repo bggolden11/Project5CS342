@@ -24,6 +24,8 @@ public abstract class NetworkConnection {
 	private int playerCount = 0;
 	int localID = 0;
 	
+	private String currentScenario = null;
+	
 	private final int MAX_PLAYERS = 8;
 	
 	private final String NEWLINE = "\n";
@@ -177,39 +179,58 @@ public abstract class NetworkConnection {
 						getClientByID(id).sendData(lobby);
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_ANSWER_OPT))
-					{
-						getClientByID(id).sendData("Your Deck");
+					{	
+						getClientByID(id).sendData(getClientByID(id).readDeck());
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_GET_SCENARIO))
 					{
-						getClientByID(id).sendData("Your Scenarios");
+						if(currentScenario == null)
+							getClientByID(id).sendData("Server has not selected a scenario");
+						else
+							getClientByID(id).sendData(currentScenario);
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_RESPONSE))
 					{
 						String clientStringResponse = dataString.replace(GameCommands.CLIENT_RESPONSE.toString(), "");
-						getClientByID(id).setResponse(clientStringResponse);
 						
-						int responsesReady = 0;
-						for(ClientInfo client : clients)
+						if(!Game.isInteger(clientStringResponse))
 						{
-							if(client.hasResponded())
-								responsesReady++;
+							getClientByID(id).sendData("Invalid answer.");
 						}
-						
-						if(responsesReady == clients.size()) //every client has submitted a response
-							callback.accept("Ready to view player selections.");
-						
-						for(ClientInfo client : clients)
+						else
 						{
-							int c = client.getID();
+							int responseID = Integer.parseInt(clientStringResponse);
+							responseID--;
 							
-							if(id != c)
-								client.sendData("Player " + id + " has chosen a card.");
+							if(responseID < 0 || responseID < getClientByID(id).getDeck().size())
+							{
+								getClientByID(id).setResponse(responseID);
+							
+								int responsesReady = 0;
+								for(ClientInfo client : clients)
+								{
+									if(client.hasResponded())
+										responsesReady++;
+								}
+								
+								if(responsesReady == clients.size()) //every client has submitted a response
+									callback.accept("Ready to view player selections.");
+								
+								for(ClientInfo client : clients)
+								{
+									int c = client.getID();
+									
+									if(id != c)
+										client.sendData("Player " + id + " has chosen a card.");
+									else
+										client.sendData("Sentence recieved.");
+									
+									if(responsesReady == clients.size()) //every client has submitted a response
+										client.sendData("All responses received, awaiting selection of winner.");
+								}
+							}
 							else
-								client.sendData("Sentence recieved.");
-							
-							if(responsesReady == clients.size()) //every client has submitted a response
-								client.sendData("All responses received, awaiting selection of winner.");
+								getClientByID(id).sendData("Invalid answer.");
 						}
 					}
 				}
@@ -229,6 +250,7 @@ public abstract class NetworkConnection {
 						else
 							client.sendData("Player " + id + " has left the game.");
 					}
+					e.printStackTrace();
 				}
 				catch (Exception e2) //server probably on fire, if this happens blame brian
 				{

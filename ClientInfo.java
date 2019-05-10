@@ -18,6 +18,7 @@ public class ClientInfo {
 	{
 		this.thread = thread;
 		id = this.thread.getID();
+		deck = new ArrayList<String>();
 	}
 	
 	public void startThread()
@@ -75,14 +76,24 @@ public class ClientInfo {
 		deck.add(card);
 	}
 	
+	public String readDeck()
+	{
+		String str = "";
+		for(int i = 0; i < deck.size(); i++)
+		{
+			str += (i + 1) + ") " + deck.get(i);
+		}
+		return str;
+	}
+	
 	public ArrayList<String> getDeck()
 	{
 		return deck;
 	}
 	
-	public void setResponse(String sentence)
+	public void setResponse(int deckID)
 	{
-		this.response = sentence;
+		this.response = getDeck().get(deckID - 1);
 		
 	}
 	

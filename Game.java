@@ -3,6 +3,7 @@ package projectFive;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class Game {
 
@@ -49,7 +50,7 @@ public class Game {
 	};
 	
 	//creates object card
-	class Card {
+	public class Card {
 	    private String sentence;  //variables stored into each card
 
 	    Card(String s){  //constructor
@@ -60,6 +61,16 @@ public class Game {
 	    String getSentence() {
 	        return sentence;
 	    }
+	}
+	
+	public String drawDeck(GameCommands deck)
+	{
+		if(Game.matchCommand(deck, GameCommands.DECK_SCENARIO))
+			return scenarios.get((new Random()).nextInt(scenarios.size())).getSentence();
+		else if(Game.matchCommand(deck, GameCommands.DECK_ANSWERS))
+			return answers.get((new Random()).nextInt(answers.size())).getSentence();
+		else
+			return "Error.";
 	}
 	
 	public String printDeck(GameCommands deck)
