@@ -58,6 +58,21 @@ public abstract class NetworkConnection {
 		ui.assignClient();
 	}
 	
+	public void setScenario(String str)
+	{
+		currentScenario = str;
+	}
+	
+	public String getScenario()
+	{
+		return currentScenario;
+	}
+	
+	public void clearScenario()
+	{
+		currentScenario = null;
+	}
+	
 	public int getLocalID()
 	{		
 		return localID; //server
@@ -265,15 +280,21 @@ public abstract class NetworkConnection {
 		
 		Socket socket;
 		private ObjectOutputStream out;
+		Game gameEngine;
 		
 		public void run() {
 			
 			if(isServer())
 			{
 				try(ServerSocket server = new ServerSocket(getPort())) {
+					gameEngine = new Game();
 					while(getNumClients() < MAX_PLAYERS)
 					{
 						ClientInfo client = new ClientInfo(new ClientThread(server.accept(), ++playerCount));
+						
+						for(int i = 0; i < 5; i++)
+							client.addCardToDeck(gameEngine.drawDeckRandom(GameCommands.DECK_ANSWERS));
+						
 						clients.add(client);
 						
 						client.startThread();	

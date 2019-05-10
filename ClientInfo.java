@@ -12,7 +12,7 @@ public class ClientInfo {
 	private int opponentID = 0;
 	private ClientThread thread;
 	private String response = null;
-	private static ArrayList<String> deck;
+	private ArrayList<String> deck;
 	
 	ClientInfo(ClientThread thread)
 	{
@@ -81,7 +81,7 @@ public class ClientInfo {
 		String str = "";
 		for(int i = 0; i < deck.size(); i++)
 		{
-			str += (i + 1) + ") " + deck.get(i);
+			str += (i + 1) + ") " + deck.get(i) + "\n";
 		}
 		return str;
 	}
@@ -93,7 +93,8 @@ public class ClientInfo {
 	
 	public void setResponse(int deckID)
 	{
-		this.response = getDeck().get(deckID - 1);
+		getDeck().remove(deckID);
+		this.response = getDeck().get(deckID);
 		
 	}
 	

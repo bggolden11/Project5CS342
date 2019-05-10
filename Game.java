@@ -63,7 +63,7 @@ public class Game {
 	    }
 	}
 	
-	public String drawDeck(GameCommands deck)
+	public String drawDeckRandom(GameCommands deck)
 	{
 		if(Game.matchCommand(deck, GameCommands.DECK_SCENARIO))
 			return scenarios.get((new Random()).nextInt(scenarios.size())).getSentence();
