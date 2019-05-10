@@ -38,6 +38,7 @@ public class Game {
 		CLIENT_RESPONSE,
 		CLIENT_LOBBY,
 		CLIENT_ASSIGN,
+		CLIENT_AWARD,
 		
 		DECK_SCENARIO,
 		DECK_ANSWERS,
@@ -59,28 +60,38 @@ public class Game {
 	    }
 	}
 	
-	public void printDeck(GameCommands deck)
+	public String printDeck(GameCommands deck)
 	{
+		String str = "Deck Error";
+		
 		if(Game.matchCommand(deck, GameCommands.DECK_SCENARIO))
 		{
-			printDeck(scenarios);
+			str = NEWLINE + "BEGIN OF DECK" + NEWLINE + printDeck(scenarios);
 		}
 		else if(Game.matchCommand(deck, GameCommands.DECK_ANSWERS))
 		{
-			printDeck(answers);
+			str = NEWLINE + "BEGIN OF DECK" + NEWLINE + printDeck(answers);
 		}
+		
+		return str;
 	}
 	
-	public void printDeck(ArrayList<Card> deck)
+	public String printDeck(ArrayList<Card> deck)
 	{
+		String str = "";
 		if(deck != null)
 		{
 		    for (int i = 0; i < deck.size(); i++) {
-		    	System.out.println(deck.get(i).getSentence());
+		    	str += deck.get(i).getSentence() + "\n";
+		    	System.out.println();
 		    }
+		    str += NEWLINE + "END OF DECK" + DBLNEWLINE;
+		    
 		}
 		else
 			System.out.println("Loading ...");
+		
+		return str;
 	}
 	
 	private ArrayList<Card> initDeck(String filePath)

@@ -72,9 +72,6 @@ public class FXNet extends Application {
 		
 		//init decks
 		gameEngine = new Game();
-		
-		gameEngine.printDeck(GameCommands.DECK_SCENARIO);
-		//gameEngine.printAnswers();
 
 		return root;
 	}
@@ -85,16 +82,20 @@ public class FXNet extends Application {
 
 		getStage().setTitle(ip + " " + "Game Server " + port);
 
-		TextField textPortNum = new TextField();
-		textPortNum.setText("5555");
-		Button btnAnnounce = new Button("View Responses");
-		Button btnExit = new Button("Exit Game");
 		
-		TextField textPlayerSelect = new TextField();
+		Button btnAnnounce = new Button("View Player Responses");
+		Button btnExit = new Button("Exit Game");
+		Button btnScenario = new Button("View All Scenarios");
+		Button btnAnswers = new Button("View All Answers");
+		Button btnClear = new Button("Clear");
+		
+		Button btnSelectAnswer = new Button("Select Response #");
+		
+		TextField textAnswerSelect = new TextField();
 
 		btnAnnounce.setOnAction(event -> {
 			try {
-				conn.send(textPlayerSelect.getText());
+				conn.send("");//winner text
 			} catch (Exception e) {
 				System.out.println("Error sending command data.");
 			}
@@ -108,10 +109,39 @@ public class FXNet extends Application {
 
 		});
 
-		VBox root = new VBox(20, messages, btnAnnounce, btnExit);
-		root.setPrefSize(600, 600);
+		VBox vbox = new VBox(messages);
+		vbox.setPrefSize(600, 500);
+		
+		btnScenario.setOnAction(event -> {
+			messages.appendText(gameEngine.printDeck(GameCommands.DECK_SCENARIO));
+		});
+		
+		btnAnswers.setOnAction(event -> {
+			messages.appendText(gameEngine.printDeck(GameCommands.DECK_ANSWERS));
+		});
+		
+		btnClear.setOnAction(event -> {
+			messages.clear();
+		});
+		
+		btnSelectAnswer.setOnAction(event -> {
+			if(Game.isInteger(textAnswerSelect.getText()))
+			{
+				messages.appendText(sendCommand(GameCommands.CLIENT_AWARD, textAnswerSelect.getText()) + NEWLINE);
+			}
+			else
+				messages.appendText("Enter Response # and press Select" + NEWLINE);
+		});
+		
+		HBox hbox = new HBox(10, btnScenario, btnAnswers, btnClear, btnExit);
+		HBox bottomhbox = new HBox(10, textAnswerSelect, btnSelectAnswer, btnAnnounce);
+		
+		BorderPane border = new BorderPane();
+		border.setTop(hbox);
+		border.setCenter(vbox);
+		border.setBottom(bottomhbox);
 
-		return root;
+		return border;
 
 	}
 
