@@ -85,6 +85,7 @@ public class FXNet extends Application {
 		
 		Button btnAnnounce = new Button("View Player Responses");
 		Button btnExit = new Button("Exit Game");
+		Button btnBegin = new Button("Begin Scenario Answers");
 		Button btnScenario = new Button("View All Scenarios");
 		Button btnAnswers = new Button("View All Answers");
 		Button btnClear = new Button("Clear");
@@ -112,6 +113,10 @@ public class FXNet extends Application {
 		VBox vbox = new VBox(messages);
 		vbox.setPrefSize(600, 500);
 		
+		btnBegin.setOnAction(event -> {
+			
+		});
+		
 		btnScenario.setOnAction(event -> {
 			messages.appendText(gameEngine.printDeck(GameCommands.DECK_SCENARIO));
 		});
@@ -133,7 +138,7 @@ public class FXNet extends Application {
 				messages.appendText("Enter Response # and press Select" + NEWLINE);
 		});
 		
-		HBox hbox = new HBox(10, btnScenario, btnAnswers, btnClear, btnExit);
+		HBox hbox = new HBox(10, btnBegin, btnScenario, btnAnswers, btnClear, btnExit);
 		HBox bottomhbox = new HBox(10, textAnswerSelect, btnSelectAnswer, btnAnnounce);
 		
 		BorderPane border = new BorderPane();
