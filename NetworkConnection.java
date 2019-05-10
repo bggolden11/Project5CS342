@@ -22,13 +22,17 @@ public abstract class NetworkConnection {
 	ArrayList<ClientInfo> clients;
 	
 	private int playerCount = 0;
+	int localID = 0;
 	
 	private final int MAX_PLAYERS = 8;
 	
 	private final String NEWLINE = "\n";
 	private final String DBLNEWLINE = "\n\n";
+
+	private FXNet ui;
 	
-	public NetworkConnection(Consumer<Serializable> callback) {
+	public NetworkConnection(FXNet ui, Consumer<Serializable> callback) {
+		this.ui = ui;
 		this.callback = callback;
 		connthread = new ConnThread();
 		connthread.setDaemon(true);
@@ -46,10 +50,15 @@ public abstract class NetworkConnection {
 		return clients.size();
 	}
 	
-	public int getClientID()
+	public void setLocalID(int id)
 	{
-		
-		return 0; //server
+		localID = id;
+		ui.assignClient();
+	}
+	
+	public int getLocalID()
+	{		
+		return localID; //server
 	}
 	
 	public ClientInfo getClientByID(int id)
@@ -152,6 +161,7 @@ public abstract class NetworkConnection {
 					
 					if(Game.matchCommand(dataString, GameCommands.CLIENT_WHOAMI))
 					{
+						getClientByID(id).sendData(GameCommands.CLIENT_ASSIGN.toString() + id);
 						getClientByID(id).sendData("You are Player " + id);
 					}
 					else if(Game.matchCommand(dataString, GameCommands.CLIENT_LOBBY))
@@ -268,7 +278,17 @@ public abstract class NetworkConnection {
 					
 					while(true) {
 						Serializable data = (Serializable) in.readObject();
-						callback.accept(data);
+						String dataString = data.toString();
+						
+						if(Game.matchCommand(dataString, GameCommands.CLIENT_ASSIGN))
+						{
+							//messages.appendText("Player not found" + NEWLINE);
+							dataString = (data.toString().replace(GameCommands.CLIENT_ASSIGN.toString(), ""));
+							if (Game.isInteger(dataString))
+								setLocalID(Integer.parseInt(dataString));
+						}
+						else
+							callback.accept(data);
 					}
 					
 				}

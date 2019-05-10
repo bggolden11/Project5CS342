@@ -28,12 +28,14 @@ public class FXNet extends Application {
 	
 	private final String NEWLINE = "\n";
 	private final String DBLNEWLINE = "\n\n";
+	
+	private Stage stage;
 
 	/* Server GUI */
 	
 	/* Main Menu */
-	private Parent initServerMenuUI(Stage primaryStage) {
-		primaryStage.setTitle(isServer ? "Server Menu" : "Client Menu");
+	private Parent initServerMenuUI() {
+		getStage().setTitle(isServer ? "Server Menu" : "Client Menu");
 		
 		TextField textPort = new TextField("Enter Port ####");
 		Button btnStart = new Button("Start Server");
@@ -52,7 +54,7 @@ public class FXNet extends Application {
 			try {
 				conn.startConn();
 
-				primaryStage.setScene(new Scene(initServerGameUI(primaryStage)));
+				getStage().setScene(new Scene(initServerGameUI()));
 			} catch (Exception e) {
 				System.out.println("Error starting connection.");
 			}
@@ -72,10 +74,10 @@ public class FXNet extends Application {
 	}
 	
 	/* Run Games */
-	private Parent initServerGameUI(Stage primaryStage) {
+	private Parent initServerGameUI() {
 		messages.setPrefHeight(550);
 
-		primaryStage.setTitle(ip + " " + "Game Server " + port);
+		getStage().setTitle(ip + " " + "Game Server " + port);
 
 		TextField textPortNum = new TextField();
 		textPortNum.setText("5555");
@@ -110,7 +112,9 @@ public class FXNet extends Application {
 	/* Client GUI */
 	
 	/* Main Menu */
-	private Parent initClientMenuUI(Stage primaryStage) {
+	private Parent initClientMenuUI() {
+
+		
 		TextField textIP = new TextField("127.0.0.1");
 		TextField textPort = new TextField("Enter Port ####");
 		Button btnStart = new Button("Connect to Server");
@@ -128,10 +132,10 @@ public class FXNet extends Application {
 				ip = textIP.getText();
 				port = Integer.parseInt(textPort.getText());
 
-				conn = createClient();
+				conn = createClient(this);
 				try {
 					conn.startConn();
-					primaryStage.setScene(new Scene(initClientGameUI(primaryStage)));
+					getStage().setScene(new Scene(initClientGameUI()));
 				} catch (Exception e) {
 					System.out.println("Error sending command data.");
 				}
@@ -142,10 +146,9 @@ public class FXNet extends Application {
 	}
 
 	/* Run Game */
-	private Parent initClientGameUI(Stage primaryStage) {
-		//messages.setPrefHeight(550);
+	private Parent initClientGameUI() {
 
-		primaryStage.setTitle(ip + ":" + port + " You are Player" + conn.getClientID());
+		//getStage().setTitle(ip + ":" + port + " Player");
 
 		TextField textPlayerSelect = new TextField();
 		Button btnSentenceSubmit = new Button("Select Sentence #");
@@ -159,8 +162,6 @@ public class FXNet extends Application {
 		});
 		
 		HBox hbox = new HBox(20, textPlayerSelect, btnSentenceSubmit);
-		//hbox.setPrefSize(600, 600);
-		
 
 		VBox vbox = new VBox(20, messages);
 
@@ -175,7 +176,6 @@ public class FXNet extends Application {
 		btnLob.setOnAction(event -> {
 			messages.appendText(sendCommand(GameCommands.CLIENT_LOBBY) + NEWLINE);
 		});
-
 
 		btnExit.setOnAction(event -> {
 			try {
@@ -193,6 +193,11 @@ public class FXNet extends Application {
 		border.setTop(hboxTwo);
 		border.setCenter(vbox);
 		border.setBottom(hbox);
+		
+
+		Platform.runLater(() -> {
+			sendCommand(GameCommands.CLIENT_WHOAMI); //ask server
+		});
 
 		return border;
 	}
@@ -200,6 +205,20 @@ public class FXNet extends Application {
 	/* Send Commands between Server/Client */
 	String sendCommand(GameCommands command) {
 		return sendCommand(command, "");
+	}
+	
+	void setStage(Stage stage) {
+		this.stage = stage;
+	}
+	
+	Stage getStage() {
+		return stage;
+	}
+	
+	void assignClient() {
+		Platform.runLater(() -> {
+			getStage().setTitle(ip + ":" + port + " You are Player " + conn.getLocalID());
+		});
 	}
 	
 	String sendCommand(GameCommands command, String param) {
@@ -234,10 +253,12 @@ public class FXNet extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// TODO Auto-generated method stub
-
-		primaryStage.setScene(
-				isServer ? new Scene(initServerMenuUI(primaryStage)) : new Scene(initClientMenuUI(primaryStage)));
-		primaryStage.show();
+		setStage(primaryStage);
+		
+		getStage().setScene(
+				isServer ? new Scene(initServerMenuUI()) : new Scene(initClientMenuUI()));
+		
+		getStage().show();
 
 	}
 
@@ -263,8 +284,8 @@ public class FXNet extends Application {
 		});
 	}
 
-	private Client createClient() {
-		return new Client(ip, port, data -> {
+	private Client createClient(FXNet ui) {
+		return new Client(ip, port, ui, data -> {
 			Platform.runLater(() -> {
 				messages.appendText(data.toString() + DBLNEWLINE);
 			});
