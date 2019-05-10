@@ -128,11 +128,11 @@ class CAH  {
     ArrayList<Card> CenterCards = new ArrayList<>(); //list of cards in the center
     private int numplayers = 4; //keeps track of num players
     private int p1 = 0,p2 = 0,p3 = 0,p4 = 0;
+    private int totalvotes = 0;
 
 
     //adds cards to center that each person plays
     void  addToCenter(Card temp){
-        System.out.println(temp.getSentence());
         CenterCards.add(temp);
     }
     //plays the game if a player has trump card and the rest do not they get a point
@@ -143,19 +143,61 @@ class CAH  {
         switch (num) {
             case 1:
                 p1++;
+                totalvotes++;
+                System.out.println("vote 1");
+                break;
             case 2:
                 p2++;
+                totalvotes++;
+                System.out.println("vote 2");
+                break;
             case 3:
                 p3++;
-            case 4: p4++;
-            default: break;
+                totalvotes++;
+                System.out.println("vote 3");
+                break;
+            case 4:
+                p4++;
+                totalvotes++;
+                System.out.println("vote 4");
+                break;
+                default:break;
+            }
+            System.out.println("Total votes " + totalvotes);
+        if(totalvotes >= 4){
+            System.out.println("take score");
+            updateScores();
+            p1 = p2 = p3 = p4 = totalvotes = 0;
+            printScores();
+        }
+    }
+
+    private void updateScores(){
+        if((p1 > p2) && (p1 > p3) && (p1 > p4)){
+            getPlayers().get(0).updateScore();
+            System.out.println("Player 1 Scored");
+
+        }
+        if((p2 > p1) && (p2 > p3) && (p2 > p4)){
+            getPlayers().get(1).updateScore();
+            System.out.println("Player 2 Scored");
+
+        }
+        if((p3 > p2) && (p3 > p1) && (p3 > p4)){
+            getPlayers().get(2).updateScore();
+            System.out.println("Player 3 Scored");
+
+        }
+        if((p4 > p2) && (p4 > p3) && (p4 > p1)){
+            getPlayers().get(3).updateScore();
+            System.out.println("Player 4 Scored");
         }
     }
 
     //prints the cards in center//used for testing
-    void printCenter(){
-        for(int i =0; i < numplayers;i++){
-            System.out.println( CenterCards.get(i).getSentence());
+    void printScores(){
+        for(int i =0; i < 4;i++){
+            System.out.println( "Player " + (i+1) + getPlayers().get(i).getScore());
         }
     }
     //default constructor for pitch
@@ -207,6 +249,14 @@ class Player {
 
     void setHand(ArrayList<Card> hand) {
         this.hand = hand;
+    }
+
+    public void updateScore() {
+        score++;
+    }
+
+    public int getScore() {
+        return score;
     }
 }
 
@@ -348,7 +398,6 @@ public class Gui extends Application {
                     }
                 }
 
-            game.printCenter();
 
             voteP1.setVisible(true); voteP2.setVisible(true); voteP3.setVisible(true); voteP4.setVisible(true);
 
@@ -379,27 +428,23 @@ public class Gui extends Application {
         //chooses clubs as trump cards
         voteP1.setOnAction(event -> {
             game.addVote(1);
-            System.out.println("vote 1");
             setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
         });
         //chooses spades as trump card
         voteP2.setOnAction(event -> {
             game.addVote(2);
-            System.out.println("vote 2");
             setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
         });
         //sets hearts as trump card
         voteP3.setOnAction(event -> {
             game.addVote(3);
-            System.out.println("vote 3");
             setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
         });
         //sets diamonds as trump card
         voteP4.setOnAction(event -> {
-            System.out.println("vote 4");
             game.addVote(4);
             setCardsVisible(game, QuestionCard, voteP1, voteP2, voteP3, voteP4);
 
