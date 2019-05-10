@@ -90,20 +90,25 @@ public abstract class NetworkConnection {
 				}
 			}
 			
-			if(responsesReady == clients.size()) //every client has submitted a response
-			{	
-					
-				for(ClientInfo client : clients)
-				{
-					try {
-						client.sendData(dataString);
-						client.resetRound(); //clear opponents
-						client.clearResponse();
-							
-					} catch (IOException e) {}
+			if(responsesReady > 0)
+			{
+				if(responsesReady == clients.size()) //every client has submitted a response
+				{	
+						
+					for(ClientInfo client : clients)
+					{
+						try {
+							client.sendData(dataString);
+							client.resetRound(); //clear opponents
+							client.clearResponse();
+								
+						} catch (IOException e) {}
+					}
+					callback.accept("Enter # of best response (sentences in random order).\n" + dataString);
 				}
-				callback.accept("Enter # of best response (sentences in random order).\n" + dataString);
 			}
+			else
+				callback.accept("No responses available.");
 		}
 		else
 			connthread.out.writeObject(data);
